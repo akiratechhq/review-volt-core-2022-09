@@ -1,0 +1,11 @@
+{
+    "project_name": "Project name",
+    "client_name": "Client name",
+    "review_period": "2 weeks",
+    "date_interval": "October 15 to November 15, 2020",
+    "person_days": "5",
+    "template": "./Readme.md.mustache",
+    "date": "September 2022",
+    "commit_hash": "86868c6f77fca67ed6586674437cc9bfc85c1963",
+    "source_repository": "https://github.com/volt-protocol/volt-protocol-core.git"
+}
