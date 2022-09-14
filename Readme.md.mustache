@@ -48,168 +48,23 @@ The initial review focused on the [{{project_name}}]({{source_repository}}) repo
 - L2Core
 - VoltSystemOracle
 - OraclePassThrough
-- TimelockController
+- TimelockController - from OpenZeppelin
 - PCVGuardian
 - PCVGuardAdmin
-- CoreRef - helper contract
-- OracleRef - helper contract
+- CoreRef
+- OracleRef
+- ERC20CompoundPCVDeposit
+- ERC20Allocator - was not found in the repository
 
 Documents:
 
-- [Market Governance Whitepaper
-](https://docs.google.com/document/d/1eSlmC_010gedoYoxN702lDU_2Y6atMfuOnvXxsITcOs/edit#heading=h.cua486onl5eh)
-- [Market Governance Alpha
-](https://docs.google.com/document/d/1wmK0esBaIxHx_iDXXHWjMo7RaELo3RVBjImhMdefyJg/edit)
+- [Market Governance Whitepaper](https://docs.google.com/document/d/1eSlmC_010gedoYoxN702lDU_2Y6atMfuOnvXxsITcOs/edit)
+- [Market Governance Alpha](https://docs.google.com/document/d/1wmK0esBaIxHx_iDXXHWjMo7RaELo3RVBjImhMdefyJg/edit)
 
 
-## Recommendations
+{{! ## Recommendations
 
-We identified a few possible general improvements that are not security issues during the review, which will bring value to the developers and the community reviewing and using the product.
-
-<!-- ### Increase the number of tests
-
-A good rule of thumb is to have 100% test coverage. This does not guarantee the lack of security problems, but it means that the desired functionality behaves as intended. The negative tests also bring a lot of value because not allowing some actions to happen is also part of the desired behavior.
-
--->
-
-<!-- ### Set up Continuous Integration
-
-Use one of the platforms that offer Continuous Integration services and implement a list of actions that compile, test, run coverage and create alerts when the pipeline fails.
-
-Because the repository is hosted on GitHub, the most painless way to set up the Continuous Integration is through [GitHub Actions](https://docs.github.com/en/free-pro-team@latest/actions).
-
-Setting up the workflow can start based on this example template.
-
-{{=<% %>=}}
-
-```yml
-name: Continuous Integration
-
-on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
-
-jobs:
-  build:
-    name: Build and test
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [12.x]
-    steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm ci
-    - run: cp ./config.sample.js ./config.js
-    - run: npm test
-
-  coverage:
-    name: Coverage
-    needs: build
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [12.x]
-    steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm ci
-    - run: cp ./config.sample.js ./config.js
-    - run: npm run coverage
-    - uses: actions/upload-artifact@v2
-      with:
-        name: Coverage ${{ matrix.node-version }}
-        path: |
-          coverage/
-```
-
-This CI template activates on pushes and pull requests on the **master** branch.
-
-```yml
-on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
-```
-
-It uses an [Ubuntu Docker](https://hub.docker.com/_/ubuntu) image as a base for setting up the project.
-
-```yml
-    runs-on: ubuntu-latest
-```
-
-Multiple Node.js versions can be used to check integration. However, because this is not primarily a Node.js project, multiple versions don't provide added value.
-
-```yml
-    strategy:
-      matrix:
-        node-version: [12.x]
-```
-
-A script item should be added in the `scripts` section of [package.json](./code/package.json) that runs all tests.
-
-```json
-{
-   "script": {
-      "test": "buidler test"
-   }
-}
-```
-
-This can then be called by running `npm test` after setting up the dependencies with `npm ci`.
-
-If any hidden variables need to be defined, you can set them up in a local version of `./config.sample.js` (locally named `./config.js`). If you decide to do that, you should also add `./config.js` in `.gitignore` to make sure no hidden variables are pushed to the public repository. The sample config file `./config.sample.js` should be sufficient to pass the test suite.
-
-```yml
-    steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm ci
-    - run: cp ./config.sample.js ./config.js
-    - run: npm test
-```
-
-You can also choose to run coverage and upload the generated artifacts.
-
-```yml
-    - run: npm run coverage
-    - uses: actions/upload-artifact@v2
-      with:
-        name: Coverage ${{ matrix.node-version }}
-        path: |
-          coverage/
-```
-
-At the moment, checking the artifacts is not [that](https://github.community/t/browsing-artifacts/16954) [easy](https://github.community/t/need-clarification-on-github-actions/16027/2), because one needs to download the zip archive, unpack it and check it. However, the coverage can be checked in the **Actions** section once it's set up.
-
-<%={{ }}=%>
--->
-
-<!-- ### Contract size
-
-The contracts are dangerously close to the hard limit defined by [EIP-170](https://eips.ethereum.org/EIPS/eip-170), specifically **24676 bytes**.
-
-Depending on the Solidity compiler version and the optimization runs, the contract size might increase over the hard limit. As stated in [the Solidity documentation](https://solidity.readthedocs.io/en/latest/using-the-compiler.html#using-the-commandline-compiler), increasing the number of optimizer runs increases the contract size.
-
-> If you want the initial contract deployment to be cheaper and the later function executions to be more expensive, set it to `--optimize-runs=1`. If you expect many transactions and do not care for higher deployment cost and output size, set `--optimize-runs` to a high number.
-
-Even if you remove the unused internal functions, it will not reduce the contract size because the Solidity compiler shakes that unused code out of the generated bytecode.
-
-#### DELEGATECALL approach
-
-Another way to improve contract size is by breaking them into multiple smaller contracts, grouped by functionality and using `DELEGATECALL` to execute that code. A standard that defines code splitting and selective code upgrade is the [EIP-2535 Diamond Standard](https://eips.ethereum.org/EIPS/eip-2535), which is an extension of [Transparent Contract Standard](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1538.md). A detailed explanation, documentation and implementations can be found in the [EIP-2535](https://eips.ethereum.org/EIPS/eip-2535). However, the current EIP is in **Draft** status, which means the interface, implementation, and overall architecture might change. Another thing to keep in mind is that using this pattern increases the gas cost. -->
+We identified a few possible general improvements that are not security issues during the review, which will bring value to the developers and the community reviewing and using the product. }}
 
 ## Issues
 
@@ -262,9 +117,179 @@ Use Solidity Visual Auditor
 
 #### Describe
 
-<!-- ```text
+We used surya to generate these outputs:
+
+```shell
 $ npx surya describe ./Contract.sol
-``` -->
+```
+
+##### Core
+
+```shell
+ +  Core (ICore, Permissions, Initializable)
+    - [Ext] init #
+       - modifiers: initializer
+    - [Ext] setVcon #
+       - modifiers: onlyGovernor
+```
+
+##### PriceBoundPSM
+
+```shell
+ +  PriceBoundPSM (PegStabilityModule, IPriceBound)
+    - [Pub] <Constructor> #
+       - modifiers: PegStabilityModule
+    - [Ext] setOracleFloorBasisPoints #
+       - modifiers: onlyGovernorOrAdmin
+    - [Ext] setOracleCeilingBasisPoints #
+       - modifiers: onlyGovernorOrAdmin
+    - [Ext] isPriceValid
+    - [Int] _allocate #
+    - [Int] _setCeilingBasisPoints #
+    - [Int] _setFloorBasisPoints #
+    - [Int] _validPrice
+    - [Int] _validatePriceRange
+```
+
+##### L2Core
+
+```shell
+ +  L2Core (ICore, Permissions)
+    - [Pub] <Constructor> #
+    - [Ext] setVcon #
+       - modifiers: onlyGovernor
+```
+
+##### VoltSystemOracle
+
+```shell
+ +  VoltSystemOracle (IVoltSystemOracle)
+    - [Pub] <Constructor> #
+    - [Pub] getCurrentOraclePrice
+    - [Ext] compoundInterest #
+```
+
+##### OraclePassThrough
+
+```shell
+ +  OraclePassThrough (IOraclePassThrough, Ownable)
+    - [Pub] <Constructor> #
+       - modifiers: Ownable
+    - [Pub] update #
+    - [Ext] read
+    - [Ext] getCurrentOraclePrice
+    - [Ext] currPegPrice
+    - [Ext] updateScalingPriceOracle #
+       - modifiers: onlyOwner
+```
+
+##### PCVGuardian
+
+```shell
+ +  PCVGuardian (IPCVGuardian, CoreRef)
+    - [Pub] <Constructor> #
+       - modifiers: CoreRef
+    - [Pub] isWhitelistAddress
+    - [Pub] getWhitelistAddresses
+    - [Ext] addWhitelistAddress #
+       - modifiers: onlyGovernor
+    - [Ext] addWhitelistAddresses #
+       - modifiers: onlyGovernor
+    - [Ext] removeWhitelistAddress #
+       - modifiers: onlyGuardianOrGovernor
+    - [Ext] removeWhitelistAddresses #
+       - modifiers: onlyGuardianOrGovernor
+    - [Ext] withdrawToSafeAddress #
+       - modifiers: hasAnyOfThreeRoles,onlyWhitelist
+    - [Ext] withdrawAllToSafeAddress #
+       - modifiers: hasAnyOfThreeRoles,onlyWhitelist
+    - [Ext] withdrawERC20ToSafeAddress #
+       - modifiers: hasAnyOfThreeRoles,onlyWhitelist
+    - [Ext] withdrawAllERC20ToSafeAddress #
+       - modifiers: hasAnyOfThreeRoles,onlyWhitelist
+    - [Int] _withdrawToSafeAddress #
+    - [Int] _withdrawERC20ToSafeAddress #
+    - [Int] _addWhitelistAddress #
+    - [Int] _removeWhitelistAddress #
+```
+
+##### PCVGuardAdmin
+
+```shell
+ +  PCVGuardAdmin (IPCVGuardAdmin, CoreRef)
+    - [Pub] <Constructor> #
+       - modifiers: CoreRef
+    - [Ext] grantPCVGuardRole #
+       - modifiers: onlyGovernor
+    - [Ext] revokePCVGuardRole #
+       - modifiers: onlyGuardianOrGovernor
+```
+
+##### CoreRef
+
+```shell
+ +  CoreRef (ICoreRef, Pausable)
+    - [Pub] <Constructor> #
+    - [Int] _initialize #
+    - [Ext] setContractAdminRole #
+       - modifiers: onlyGovernor
+    - [Pub] isContractAdmin
+    - [Pub] pause #
+       - modifiers: onlyGuardianOrGovernor
+    - [Pub] unpause #
+       - modifiers: onlyGuardianOrGovernor
+    - [Pub] core
+    - [Pub] volt
+    - [Pub] vcon
+    - [Pub] voltBalance
+    - [Pub] vconBalance
+    - [Int] _burnVoltHeld #
+    - [Int] _mintVolt #
+    - [Int] _setContractAdminRole #
+```
+
+##### OracleRef
+
+```shell
+ +  OracleRef (IOracleRef, CoreRef)
+    - [Pub] <Constructor> #
+       - modifiers: CoreRef
+    - [Ext] setOracle #
+       - modifiers: onlyGovernor
+    - [Ext] setDoInvert #
+       - modifiers: onlyGovernor
+    - [Ext] setDecimalsNormalizer #
+       - modifiers: onlyGovernor
+    - [Ext] setBackupOracle #
+       - modifiers: onlyGovernorOrAdmin
+    - [Pub] invert
+    - [Pub] updateOracle #
+    - [Pub] readOracle
+    - [Int] _setOracle #
+    - [Int] _setBackupOracle #
+    - [Int] _setDoInvert #
+    - [Int] _setDecimalsNormalizer #
+    - [Int] _setDecimalsNormalizerFromToken #
+```
+
+##### ERC20CompoundPCVDeposit
+
+```shell
+ +  ERC20CompoundPCVDeposit (CompoundPCVDepositBase)
+    - [Pub] <Constructor> #
+       - modifiers: CompoundPCVDepositBase
+    - [Ext] deposit #
+       - modifiers: whenNotPaused
+    - [Int] _transferUnderlying #
+    - [Pub] balanceReportedIn
+```
+
+
+Legend
+```shell
+ ($) = payable function
+ # = non-constant function
+```
 
 ### Coverage
 
