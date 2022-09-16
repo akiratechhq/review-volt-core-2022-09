@@ -5,7 +5,7 @@
           </span>
           <br />
           <span id="project-value">
-               Project name
+               Volt Protocol Core
           </span>
     </div>
      <div id="details">
@@ -15,7 +15,7 @@
                </span>
                <br />
                <span class="details-value">
-                    Client name
+                    Volt Protocol
                </span>
                <br />
                <span class="splash-title">
@@ -36,10 +36,6 @@
                </span><br />
                <span class="contact">@cleanunicorn</span>
                <br />
-               <span class="details-value">
-                    Andrei Simion
-               </span><br />
-               <span class="contact">@andreiashu</span>
           </div>
     </div>
 </div>
@@ -50,27 +46,26 @@
  - [Issues Summary](#issues-summary)
  - [Executive summary](#executive-summary)
      - [Week 1](#week-1)
-     - [Week 2](#week-2)
  - [Scope](#scope)
  - [Issues](#issues)
-     - [Users can lose funds if they call ERC20CompoundPCVDeposit.deposit() directly](#users-can-lose-funds-if-they-call-erc20compoundpcvdepositdeposit-directly)
+     - [Oracle implementation can be made more robust](#oracle-implementation-can-be-made-more-robust)
      - [_validPrice can include floor and ceiling values when checking the validity](#_validprice-can-include-floor-and-ceiling-values-when-checking-the-validity)
      - [Setting ceiling basis points does not need a non zero validation](#setting-ceiling-basis-points-does-not-need-a-non-zero-validation)
  - [Artifacts](#artifacts)
-     - [Surya](#surya)
-     - [Coverage](#coverage)
+     - [Architecture](#architecture)
      - [Tests](#tests)
  - [License](#license)
 
 
 ## Details
 
-- **Client** Client name
+- **Client** Volt Protocol
 - **Date** September 2022
 - **Lead reviewer** Daniel Luca ([@cleanunicorn](https://twitter.com/cleanunicorn))
 - **Reviewers** Daniel Luca ([@cleanunicorn](https://twitter.com/cleanunicorn)), Andrei Simion ([@andreiashu](https://twitter.com/andreiashu))
-- **Repository**: [Project name](https://github.com/volt-protocol/volt-protocol-core.git)
+- **Repository**: [Volt Protocol Core](https://github.com/volt-protocol/volt-protocol-core.git)
 - **Commit hash** `86868c6f77fca67ed6586674437cc9bfc85c1963`
+- **Final commit hash** `1a1ce42f5131059084b8def03a75c334762fad98`
 - **Technologies**
   - Solidity
   - Node.JS
@@ -79,30 +74,34 @@
 
 | SEVERITY       |    OPEN    |    CLOSED    |
 |----------------|:----------:|:------------:|
-|  Informational  |  0  |  0  |
+|  Informational  |  0  |  1  |
 |  Minor  |  2  |  0  |
 |  Medium  |  0  |  0  |
-|  Major  |  1  |  0  |
+|  Major  |  0  |  0  |
 
 ## Executive summary
 
-This report represents the results of the engagement with **Client name** to review **Project name**.
+This report represents the results of the engagement with **Volt Protocol** to review **Volt Protocol Core**.
 
-The review was conducted over the course of **2 weeks** from **October 15 to November 15, 2020**. A total of **5 person-days** were spent reviewing the code.
+The review was conducted over the course of **1 week** from **September 12 to September 16, 2022**. A total of **5 person-days** were spent reviewing the code.
 
 ### Week 1
 
-During the first week, we ...
+During the first week, we started to manually review the code and the provided documents. The code is well documented and of good quality, but it's highly modular and it's hard to understand the overall architecture. We started to write a high-level architecture diagram and we started to write a list of the most important contracts.
 
-### Week 2
+We identified a few low severity issues, but we didn't find any critical issues. We also identified a few issues that could be improved, but they don't represent a security risk.
 
-The second week was ...
+On Wednesday, we set up a meeting with the client to discuss the architecture and the issues we found. The dev team needed us to check a new PR that is about to hit the mainnet. This PR is identified by commit hash `1a1ce42f5131059084b8def03a75c334762fad98`. The scope was extended to include the file `contracts/pcv/utils/ERC20Allocator.sol`.
+
+On Thursday, we focused on the newly added file. We had another meeting with the client where we discussed details in the implementation of the new contract.
+
+On Friday, we made sure we didn't have any open or unfinished issues and had another meeting with the client to deliver the report and discuss any open questions.
 
 ## Scope
 
-The initial review focused on the [Project name](https://github.com/volt-protocol/volt-protocol-core.git) repository, identified by the commit hash `86868c6f77fca67ed6586674437cc9bfc85c1963`. ...
+The initial review focused on the [Volt Protocol Core](https://github.com/volt-protocol/volt-protocol-core.git) repository, identified by the commit hash `86868c6f77fca67ed6586674437cc9bfc85c1963`. Later during the week, another file was added to the scope, identified by the commit hash `1a1ce42f5131059084b8def03a75c334762fad98`.
 
-<!-- We focused on manually reviewing the codebase, searching for security issues such as, but not limited to, re-entrancy problems, transaction ordering, block timestamp dependency, exception handling, call stack depth limitation, integer overflow/underflow, self-destructible contracts, unsecured balance, use of origin, costly gas patterns, architectural problems, code readability. -->
+We focused on manually reviewing the codebase, searching for security issues such as, but not limited to, re-entrancy problems, transaction ordering, block timestamp dependency, exception handling, call stack depth limitation, integer overflow/underflow, self-destructible contracts, unsecured balance, use of origin, costly gas patterns, architectural problems, code readability.
 
 **Includes:**
 - PriceBoundPSM
@@ -116,7 +115,7 @@ The initial review focused on the [Project name](https://github.com/volt-protoco
 - CoreRef
 - OracleRef
 - ERC20CompoundPCVDeposit
-- ERC20Allocator - was not found in the repository
+- ERC20Allocator - added later in the scope
 
 Documents:
 
@@ -128,273 +127,107 @@ Documents:
 ## Issues
 
 
-### [Users can lose funds if they call `ERC20CompoundPCVDeposit.deposit()` directly](https://github.com/akiratechhq/review-volt-core-2022-09/issues/4)
-![Issue status: Open](https://img.shields.io/static/v1?label=Status&message=Open&color=5856D6&style=flat-square) ![Major](https://img.shields.io/static/v1?label=Severity&message=Major&color=ff3b30&style=flat-square)
+### [Oracle implementation can be made more robust](https://github.com/akiratechhq/review-volt-core-2022-09/issues/5)
+![Issue status: Acknowledged](https://img.shields.io/static/v1?label=Status&message=Acknowledged&color=007AFF&style=flat-square) ![Informational](https://img.shields.io/static/v1?label=Severity&message=Informational&color=34C759&style=flat-square)
 
 **Description**
 
-We can see the current `deposit` implementation:
+The current oracle implementation does not account for external systems failures. There is no immediate threat, but the oracle system must be a very robust and trusted component.
 
+Consider this approach for implementing an oracle system.
 
-[code/contracts/pcv/compound/ERC20CompoundPCVDeposit.sol#L24-L37](https://github.com/akiratechhq/review-volt-core-2022-09/blob/5826c86d97f928c23d23c5d2b6cabefba4649e67/code/contracts/pcv/compound/ERC20CompoundPCVDeposit.sol#L24-L37)
+We define a base class that handles passing the value obtained from an oracle implementation. This class implements a robust approach for getting the value, even if the implementation fails. 
+
 ```solidity
-    /// @notice deposit ERC-20 tokens to Compound
-    function deposit() external override whenNotPaused {
-        uint256 amount = token.balanceOf(address(this));
-
-        token.approve(address(cToken), amount);
-
-        // Compound returns non-zero when there is an error
-        require(
-            CErc20(address(cToken)).mint(amount) == 0,
-            "ERC20CompoundPCVDeposit: deposit error"
-        );
-
-        emit Deposit(msg.sender, amount);
-    }
-```
-
-The method expects the tokens to already be in the contract's possession:
-
-
-[code/contracts/pcv/compound/ERC20CompoundPCVDeposit.sol#L26](https://github.com/akiratechhq/review-volt-core-2022-09/blob/5826c86d97f928c23d23c5d2b6cabefba4649e67/code/contracts/pcv/compound/ERC20CompoundPCVDeposit.sol#L26)
-```solidity
-        uint256 amount = token.balanceOf(address(this));
-```
-
-Proceeds to allow [`cToken`](https://github.com/compound-finance/compound-protocol/blob/a3214f67b73310d547e00fc578e8355911c9d376/contracts/CToken.sol) to move tokens on its behalf:
-
-
-[code/contracts/pcv/compound/ERC20CompoundPCVDeposit.sol#L28](https://github.com/akiratechhq/review-volt-core-2022-09/blob/5826c86d97f928c23d23c5d2b6cabefba4649e67/code/contracts/pcv/compound/ERC20CompoundPCVDeposit.sol#L28)
-```solidity
-        token.approve(address(cToken), amount);
-```
-
-And calls `cToken.mint()`:
-
-
-[code/contracts/pcv/compound/ERC20CompoundPCVDeposit.sol#L30-L34](https://github.com/akiratechhq/review-volt-core-2022-09/blob/5826c86d97f928c23d23c5d2b6cabefba4649e67/code/contracts/pcv/compound/ERC20CompoundPCVDeposit.sol#L30-L34)
-```solidity
-        // Compound returns non-zero when there is an error
-        require(
-            CErc20(address(cToken)).mint(amount) == 0,
-            "ERC20CompoundPCVDeposit: deposit error"
-        );
-```
-
-Under the hood, `mint()` takes the tokens from the caller's account. We can see that by following the call stack in the canonical implementation:
-
-Mint calls `mintInternal`:
-
-
-[contracts/CErc20.sol#L43-L52](https://github.com/compound-finance/compound-protocol/blob/a3214f67b73310d547e00fc578e8355911c9d376/contracts/CErc20.sol#L43-L52)
-```solidity
-    /**
-     * @notice Sender supplies assets into the market and receives cTokens in exchange
-     * @dev Accrues interest whether or not the operation succeeds, unless reverted
-     * @param mintAmount The amount of the underlying asset to supply
-     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-     */
-    function mint(uint mintAmount) override external returns (uint) {
-        mintInternal(mintAmount);
-        return NO_ERROR;
-    }
-```
-
-Which calls `mintFresh`:
-
-
-[contracts/CToken.sol#L381-L390](https://github.com/compound-finance/compound-protocol/blob/a3214f67b73310d547e00fc578e8355911c9d376/contracts/CToken.sol#L381-L390)
-```solidity
-    /**
-     * @notice Sender supplies assets into the market and receives cTokens in exchange
-     * @dev Accrues interest whether or not the operation succeeds, unless reverted
-     * @param mintAmount The amount of the underlying asset to supply
-     */
-    function mintInternal(uint mintAmount) internal nonReentrant {
-        accrueInterest();
-        // mintFresh emits the actual Mint event if successful and logs on errors, so we don't need to
-        mintFresh(msg.sender, mintAmount);
-    }
-```
-
-The method `mintFresh` does a few things, but we're interested in the part where tokens are moved, which happens in `doTransferIn`:
-
-
-[contracts/CToken.sol#L392-L398](https://github.com/compound-finance/compound-protocol/blob/a3214f67b73310d547e00fc578e8355911c9d376/contracts/CToken.sol#L392-L398)
-```solidity
-    /**
-     * @notice User supplies assets into the market and receives cTokens in exchange
-     * @dev Assumes interest has already been accrued up to the current block
-     * @param minter The address of the account which is supplying the assets
-     * @param mintAmount The amount of the underlying asset to supply
-     */
-    function mintFresh(address minter, uint mintAmount) internal {
-```
-
-
-[contracts/CToken.sol#L416-L424](https://github.com/compound-finance/compound-protocol/blob/a3214f67b73310d547e00fc578e8355911c9d376/contracts/CToken.sol#L416-L424)
-```solidity
-        /*
-         *  We call `doTransferIn` for the minter and the mintAmount.
-         *  Note: The cToken must handle variations between ERC-20 and ETH underlying.
-         *  `doTransferIn` reverts if anything goes wrong, since we can't be sure if
-         *  side-effects occurred. The function returns the amount actually transferred,
-         *  in case of a fee. On success, the cToken holds an additional `actualMintAmount`
-         *  of cash.
-         */
-        uint actualMintAmount = doTransferIn(minter, mintAmount);
-```
-
-Which tries to transfer the tokens from the caller (`ERC20CompoundPCVDeposit`) in the `CToken` implementation:
-
-
-[contracts/CErc20.sol#L152-L182](https://github.com/compound-finance/compound-protocol/blob/a3214f67b73310d547e00fc578e8355911c9d376/contracts/CErc20.sol#L152-L182)
-```solidity
-    /**
-     * @dev Similar to EIP20 transfer, except it handles a False result from `transferFrom` and reverts in that case.
-     *      This will revert due to insufficient balance or insufficient allowance.
-     *      This function returns the actual amount received,
-     *      which may be less than `amount` if there is a fee attached to the transfer.
-     *
-     *      Note: This wrapper safely handles non-standard ERC-20 tokens that do not return a value.
-     *            See here: https://medium.com/coinmonks/missing-return-value-bug-at-least-130-tokens-affected-d67bf08521ca
-     */
-    function doTransferIn(address from, uint amount) virtual override internal returns (uint) {
-        // Read from storage once
-        address underlying_ = underlying;
-        EIP20NonStandardInterface token = EIP20NonStandardInterface(underlying_);
-        uint balanceBefore = EIP20Interface(underlying_).balanceOf(address(this));
-        token.transferFrom(from, address(this), amount);
-
-        bool success;
-        assembly {
-            switch returndatasize()
-                case 0 {                       // This is a non-standard ERC-20
-                    success := not(0)          // set success to true
-                }
-                case 32 {                      // This is a compliant ERC-20
-                    returndatacopy(0, 0, 32)
-                    success := mload(0)        // Set `success = returndata` of override external call
-                }
-                default {                      // This is an excessively non-compliant ERC-20, revert.
-                    revert(0, 0)
-                }
+abstract contract OracleBase {
+    function value() external returns (uint256 value_, bool valid_) {
+        // Try to get the value
+        try this.obtainValue() returns (uint256 valueReturned, bool valid) {
+            // Prepare the value to be returned
+            value_ = valueReturned;
+            // Pass the valid bool
+            valid_ = valid;
+        } catch {
+            value_ = 0;
+            valid_ = false;
         }
-        require(success, "TOKEN_TRANSFER_IN_FAILED");
-```
 
-Following this complete call stack we see that the tokens are indeed moved in the `CToken` implementation.
-
-Thus, when a user wants to deposit tokens in the contract `ERC20CompoundPCVDeposit`, they need to do these two actions:
-
-- send tokens to `ERC20CompoundPCVDeposit`
-- call `ERC20CompoundPCVDeposit.deposit()`
-
-The method `deposit()` expects the tokens to be in the contract before the method is executed. This isn't obvious, but we made sure that's the case by discussing it with the development team and checking the canonical Compound implementation.
-
-Having the tokens in the contract before `deposit()` is called, leaves room for attackers to front-run the execution of `deposit()`.
-
-Even if Compound implements this approach, it doesn't mean the same pattern needs to be implemented in `ERC20CompoundPCVDeposit`.
-
-However, having the tokens in `ERC20CompoundPCVDeposit` exposes the user to front-running attacks.
-
-We can protect the user in a few ways.
-
-1. Create a proxy contract that bundles together `transfer` and `deposit`. This will be similar to how the tests currently work, since both actions happen synchronously and there is no possibility to front-run the execution of `deposit`. We can see this approach in the tests included in the repository that the `transfer` and `deposit` happen one after the other:
-
-
-[code/contracts/test/integration/IntegrationTestCompoundPCVDeposits.t.sol#L44-L52](https://github.com/akiratechhq/review-volt-core-2022-09/blob/5826c86d97f928c23d23c5d2b6cabefba4649e67/code/contracts/test/integration/IntegrationTestCompoundPCVDeposits.t.sol#L44-L52)
-```solidity
-    function setUp() public {
-        daiBalance = daiDeposit.balance();
-
-        usdcBalance = usdcDeposit.balance();
-
-        vm.prank(MainnetAddresses.CUSDC);
-        usdc.transfer(address(usdcDeposit), usdcBalance);
-        usdcDeposit.deposit();
+        return (value_, valid_);
     }
-```
 
-But this does not correctly simulate an external user interacting with the system because a user will likely create two separate transactions.
-
-We can fix this if we only allow the users to interact with `ERC20CompoundPCVDeposit` through a contract.
-
-Going in this direction, the development team needs to do a few things:
-
-- create a proxy actions contract that implements the desired interaction with the protocol;
-- add limits in `deposit()` to ensure `msg.sender` is a contract, reducing the risk of users sending the transactions one after the other.
-
-Implementing a proxy actions contract is a lot of work since the dev team will need to implement the action bundle described above and also every other action possible in the system. It also adds additional gas costs since a proxy action contract might be needed for each user before interacting with the system.
-
-Taking this approach doesn't seem to be the ideal one, since a lot of additional work needs to be put in. However, we have an alternative 👇 
-
-2. Modify `ERC20CompoundPCVDeposit` to use `transferFrom`
-
-A different implementation of `deposit` can protect the user from being front-run while reducing the amount of development work.
-
-Ideally we would add an argument to `deposit()` to specify the amount of tokens to deposit. This allows us to transfer the amount of tokens to `ERC20CompoundPCVDeposit` and call `CErc20(address(cToken)).mint(_amount)` which would safely move the tokens around.
-
-```solidity
-/// @notice deposit ERC-20 tokens to Compound
-function deposit(uint256 _amount) external override whenNotPaused {
-    token.transferFrom(msg.sender, address(this), _amount);
-
-    // Compound returns non-zero when there is an error
-    require(
-        CErc20(address(cToken)).mint(_amount) == 0,
-        "ERC20CompoundPCVDeposit: deposit error"
-    );
-
-    emit Deposit(msg.sender, _amount);
-}
-
-```
-
-If the method signature can't be changed because `IPCVDeposit` needs a `deposit()` method with no arguments, we can take a different approach.
-
-- Find out the amount of tokens the user has in their possession;
-- Find out the approval amount the user allows `ERC20CompoundPCVDeposit` to transfer in their behalf;
-- Deposit the minimum of the two values.
-
-An example implementation would look like this:
-
-```solidity
-/// @notice deposit ERC-20 tokens to Compound
-function deposit() external override whenNotPaused {
-    // We need the minimum of the two values, because the user 
-    // might approve more than their balance 
-    uint256 amount = min(
-        // The amount of tokens we are allowed to move
-        token.allowance(msg.sender, address(this)),
-        // The user's total balance
-        token.balanceOf(msg.sender)
-    );
-
-    token.transferFrom(msg.sender, address(this), amount);
-
-    // Compound returns non-zero when there is an error
-    require(
-        CErc20(address(cToken)).mint(amount) == 0,
-        "ERC20CompoundPCVDeposit: deposit error"
-    );
-
-    emit Deposit(msg.sender, amount);
+    function obtainValue() external virtual returns (uint256 value, bool valid);
 }
 ```
 
-Please do not use the example code verbatim since they haven't been tested at all and make sure to thoroughly test before doing the update.
+The call to `obtainValue()` can fail because of external calls or improper developer implementation. Whatever the case, the base class can handle these fails and can do much more if multiple fails happen in a row, or provide a cached value, or notify a system that they're offline.
+
+Any oracle will use this base class and must implement `obtainValue` specific to the value they need to retrieve.
+
+```solidity
+
+contract OracleImplementation is OracleBase {
+    ExternalContract immutable public ec;
+
+    constructor(ExternalContract _ec) {
+        // Save the external provider's address
+        ec = _ec;
+    }
+
+    function obtainValue() override(OracleBase) external returns (uint256, bool) {
+        // Make sure this is not called externally by anyone else. 
+        require(msg.sender == address(this), "Oracle must call itself to get the value");
+
+        // Talk to `ExternalContract` and get the scale
+        uint256 scale = ec.getScale();
+
+        // Sometimes you need to do something with the value
+        scale = scale / 10;
+
+        // Validate the processed value
+        bool valid = scale <= 42;
+
+        // Return scale
+        return (scale, valid);
+    }
+}
+```
+
+In this case, `OracleImplementation` talks to an external system, and they don't need to account for any failures, unexpected upgrades or weird behavior.
+
+Its only purpose is to obtain the value, process it (if necessary), validate it and return the value if the validity.
+
+`OracleBase` should not care what the value represents, its purpose is to handle failures and pass on the values.
+
+`OracleImplementation` has to understand the value obtained and must know how to process and validate it.
+
+Finally, we tested this with an implementation that returns a value or sometimes fails to ensure our example implementation holds.
+
+```solidity
+contract ExternalContract {
+    function getScale() public view returns (uint256 scale_) {
+        // Simulate random reverts
+        if (block.number % 2 == 0) {
+            // fail
+            revert("Sometimes it fails");
+        } else {
+            // return a value, do not fail
+            return 12;
+        }
+    }
+}
+```
+
+Separating the concerns between `OracleBase` and `OracleImplementation` allows for:
+
+- adding new developers that do not have to understand the whole system in order to develop an oracle;
+- protecting from unexpected external changes or upgrades;
+- protecting from unexpected external fails.
 
 **Recommendation**
 
-Consider the two options and see if any presented approaches make sense to implement to protect the users from being front-run.
+Consider stabilizing the oracle interface and implementation to allow for an increase in developer speed, while retaining robust principles and execution
 
-**References**
-
-- [MakerDAO's DSSProxy](https://etherscan.io/address/0x82ecd135dce65fbc6dbdd0e4237e0af93ffd5038#code)
-- [OpenZeppelin Proxy](https://docs.openzeppelin.com/contracts/4.x/api/proxy#Proxy)
-- [FIATDAO Action implementation](https://github.com/fiatdao/actions)
+ 
 
 ---
 
@@ -566,39 +399,11 @@ Consider replacing the `require` with a comment that explains why the check is n
 
 ## Artifacts
 
-### Surya
+### Architecture
 
-Sūrya is a utility tool for smart contract systems. It provides a number of visual outputs and information about the structure of smart contracts. It also supports querying the function call graph in multiple ways to aid in the manual inspection and control flow analysis of contracts.
+The architecture is extremely hard to understand and it's not well documented. We started to work on a high-level architecture diagram.
 
-<!-- **Contracts Description Table**
-
-```text
-surya mdreport report.md Contract.sol
-```
-
--->
-
-#### Graphs
-
-<!-- ***Contract***
-
-```text
-surya graph Contract.sol | dot -Tpng > ./static/Contract_graph.png
-```
-
-![Contract Graph](./static/Contract_graph.png)
-
-```text
-surya inheritance Contract.sol | dot -Tpng > ./static/Contract_inheritance.png
-```
-
-![Contract Inheritance](./static/Contract_inheritance.png)
-
-```text
-Use Solidity Visual Auditor
-```
-
-![Contract UML](./static/Contract_uml.png) -->
+![static/Volt-Diagram-Drawio.png](static/Volt-Diagram-Drawio.svg)
 
 #### Describe
 
@@ -776,17 +581,336 @@ Legend
  # = non-constant function
 ```
 
-### Coverage
-
-<!-- ```text
-$ npm run coverage
-``` -->
-
 ### Tests
 
-<!-- ```text
-$ npx buidler test
-``` -->
+```text
+$ npm run test
+
+
+> @voltprotocol/volt-protocol-core@1.0.0 test
+> forge test --match-contract UnitTest -vvv
+
+[⠒] Compiling...
+[⠑] Compiling 1 files with 0.4.26
+[⠘] Compiling 71 files with 0.8.13
+[⠃] Compiling 78 files with 0.8.16
+[⠔] Solc 0.4.26 finished in 36.38ms
+[⠊] Solc 0.8.16 finished in 4.48s
+[⠘] Solc 0.8.13 finished in 10.90s
+Compiler run successful (with warnings)
+contracts/external/WETH9.sol:47:9: Warning: Invoking events without "emit" prefix is deprecated.
+        Deposit(msg.sender, msg.value);
+        ^----------------------------^
+
+
+contracts/external/WETH9.sol:54:9: Warning: Invoking events without "emit" prefix is deprecated.
+        Withdrawal(msg.sender, wad);
+        ^-------------------------^
+
+
+contracts/external/WETH9.sol:58:16: Warning: Using contract member "balance" inherited from the address type is deprecated. Convert the contract to "address" type to access the member, for example use "address(contract).balance" instead.
+        return this.balance;
+               ^----------^
+
+
+contracts/external/WETH9.sol:63:9: Warning: Invoking events without "emit" prefix is deprecated.
+        Approval(msg.sender, guy, wad);
+        ^----------------------------^
+
+
+contracts/external/WETH9.sol:86:9: Warning: Invoking events without "emit" prefix is deprecated.
+        Transfer(src, dst, wad);
+        ^---------------------^
+
+
+warning[8760]: Warning: This declaration has the same name as another declaration.
+  --> contracts/pcv/utils/ERC20Allocator.sol:79:9:
+   |
+79 |         uint248 targetBalance,
+   |         ^^^^^^^^^^^^^^^^^^^^^
+Note: The other declaration is here:
+   --> contracts/pcv/utils/ERC20Allocator.sol:280:5:
+    |
+280 |     function targetBalance(address psm) external view returns (uint256) {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+
+warning[8760]: Warning: This declaration has the same name as another declaration.
+   --> contracts/pcv/utils/ERC20Allocator.sol:104:48:
+    |
+104 |     function editPSMTargetBalance(address psm, uint248 targetBalance)
+    |                                                ^^^^^^^^^^^^^^^^^^^^^
+Note: The other declaration is here:
+   --> contracts/pcv/utils/ERC20Allocator.sol:280:5:
+    |
+280 |     function targetBalance(address psm) external view returns (uint256) {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+
+warning[2072]: Warning: Unused local variable.
+  --> contracts/test/integration/vip/vip8.sol:94:9:
+   |
+94 |         uint256 daiBalance = PegStabilityModule(MainnetAddresses.FEI_DAI_PSM)
+   |         ^^^^^^^^^^^^^^^^^^
+
+
+
+warning[2072]: Warning: Unused local variable.
+   --> contracts/test/unit/pcv/utils/ERC20Allocator.t.sol:619:9:
+    |
+619 |         uint256 skimAmount = (bufferCap - bufferEnd) * 2;
+    |         ^^^^^^^^^^^^^^^^^^
+
+
+
+warning[2018]: Warning: Function state mutability can be restricted to view
+   --> contracts/test/integration/vip/vip10.sol:121:5:
+    |
+121 |     function getMainnetProposal()
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+
+warning[2018]: Warning: Function state mutability can be restricted to pure
+   --> contracts/test/integration/vip/vip10.sol:185:5:
+    |
+185 |     function arbitrumSetup() public override {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+
+warning[2018]: Warning: Function state mutability can be restricted to pure
+   --> contracts/test/integration/vip/vip10.sol:189:5:
+    |
+189 |     function arbitrumValidate() public override {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+
+warning[2018]: Warning: Function state mutability can be restricted to pure
+   --> contracts/test/integration/vip/vip8.sol:141:5:
+    |
+141 |     function arbitrumSetup() public override {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+
+warning[2018]: Warning: Function state mutability can be restricted to pure
+   --> contracts/test/integration/vip/vip8.sol:145:5:
+    |
+145 |     function arbitrumValidate() public override {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+
+warning[2018]: Warning: Function state mutability can be restricted to pure
+   --> contracts/test/integration/vip/vip9.sol:110:5:
+    |
+110 |     function arbitrumSetup() public override {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+
+warning[2018]: Warning: Function state mutability can be restricted to pure
+   --> contracts/test/integration/vip/vip9.sol:114:5:
+    |
+114 |     function arbitrumValidate() public override {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+
+
+Running 2 tests for contracts/test/unit/Volt.t.sol:UnitTestVolt
+[PASS] testDeployedMetaData() (gas: 17541)
+[PASS] testMintsVolt() (gas: 70031)
+Test result: ok. 2 passed; 0 failed; finished in 8.31ms
+
+Running 2 tests for contracts/test/unit/core/Core.t.sol:UnitTestCore
+[PASS] testGovernorSetsVcon() (gas: 22417)
+[PASS] testNonGovernorFailsSettingVcon() (gas: 13096)
+Test result: ok. 2 passed; 0 failed; finished in 7.28ms
+
+Running 4 tests for contracts/test/unit/oracle/OraclePassThrough.t.sol:UnitTestOraclePassThrough
+[PASS] testDataPassThroughSync() (gas: 23897)
+[PASS] testSetup() (gas: 12820)
+[PASS] testUpdateScalingPriceOracleFailureNotGovernor() (gas: 13697)
+[PASS] testUpdateScalingPriceOracleSuccess() (gas: 244964)
+Test result: ok. 4 passed; 0 failed; finished in 10.97ms
+
+Running 6 tests for contracts/test/unit/utils/KArrayTree.t.sol:KArrayTreeUnitTest
+[PASS] testAddDuplicateFails() (gas: 5643)
+[PASS] testAddDuplicateFailsFind() (gas: 39737)
+[PASS] testCanChangeRole() (gas: 40888)
+[PASS] testCannotChangeToExistingRole() (gas: 5672)
+[PASS] testFree() (gas: 52596)
+[PASS] testSetup() (gas: 46808)
+Test result: ok. 6 passed; 0 failed; finished in 452.71µs
+
+Running 3 tests for contracts/test/unit/utils/Deviation.t.sol:UnitTestDeviation
+[PASS] testDeviation() (gas: 1332)
+[PASS] testOutsideDeviation() (gas: 3350)
+[PASS] testWithinDeviation() (gas: 3120)
+Test result: ok. 3 passed; 0 failed; finished in 179.65µs
+
+Running 3 tests for contracts/test/unit/core/L2Core.t.sol:UnitTestL2Core
+[PASS] testGovernorSetsVcon() (gas: 39600)
+[PASS] testNonGovernorFailsSettingVcon() (gas: 13129)
+[PASS] testSetup() (gas: 57635)
+Test result: ok. 3 passed; 0 failed; finished in 955.64µs
+
+Running 7 tests for contracts/test/unit/pcv/PCVGuardAdmin.t.sol:UnitTestPCVGuardAdmin
+[PASS] testGrantPCVGuard() (gas: 99226)
+[PASS] testGrantPCVGuardFailWhenGuardian() (gas: 17065)
+[PASS] testGrantPCVGuardFailWhenNoRoles() (gas: 14577)
+[PASS] testPCVGuardAdminRole() (gas: 10163)
+[PASS] testRevokePCVGuardFailWhenNoRole() (gas: 19918)
+[PASS] testRevokePCVGuardGovernor() (gas: 36082)
+[PASS] testRevokePCVGuardGuardian() (gas: 38636)
+Test result: ok. 7 passed; 0 failed; finished in 1.66ms
+
+Running 11 tests for contracts/test/unit/pcv/ERC20HoldingPCVDeposit.t.sol:UnitTestERC20HoldingsPCVDeposit
+[PASS] testDepositFailsOnPause() (gas: 40859)
+[PASS] testDepositNoOp() (gas: 7591)
+[PASS] testWithdrawAllFailsNonPCVController() (gas: 17439)
+[PASS] testWithdrawAllSucceeds() (gas: 82588)
+[PASS] testWithdrawERC20FailsNonPCVController() (gas: 16553)
+[PASS] testWithdrawERC20Succeeds() (gas: 82261)
+[PASS] testWithdrawEthFailsNonPCVController() (gas: 14410)
+[PASS] testWithdrawEthSucceeds() (gas: 51551)
+[PASS] testWithdrawFailsNonPCVController() (gas: 17497)
+[PASS] testWithdrawSucceeds() (gas: 81625)
+[PASS] testWrapEthFailsWhenNotOnMainnetOrArbitrum() (gas: 9021)
+Test result: ok. 11 passed; 0 failed; finished in 22.95ms
+
+Running 34 tests for contracts/test/unit/pcv/PCVGuardian.t.sol:UnitTestPCVGuardian
+[PASS] testAddWhiteListAddress() (gas: 68365)
+[PASS] testGovernorWithdrawAllERC20ToSafeAddress() (gas: 62208)
+[PASS] testGovernorWithdrawERC20ToSafeAddress() (gas: 61455)
+[PASS] testGuardianWithdrawAllERC20ToSafeAddress() (gas: 65460)
+[PASS] testGuardianWithdrawAllToSafeAddress() (gas: 71328)
+[PASS] testGuardianWithdrawERC20ToSafeAddress() (gas: 64622)
+[PASS] testGuardianWithdrawToSafeAddress() (gas: 70016)
+[PASS] testPCVGuardAdminRole() (gas: 10202)
+[PASS] testPCVGuardWithdrawAllERC20ToSafeAddress() (gas: 68592)
+[PASS] testPCVGuardWithdrawAllToSafeAddress() (gas: 74451)
+[PASS] testPCVGuardWithdrawERC20ToSafeAddress() (gas: 67830)
+[PASS] testPCVGuardWithdrawToSafeAddress() (gas: 73213)
+[PASS] testPCVGuardianRoles() (gas: 13642)
+[PASS] testPausedAfterWithdrawAllToSafeAddress() (gas: 105301)
+[PASS] testPausedAfterWithdrawToSafeAddress() (gas: 104032)
+[PASS] testRemoveWhiteListAddress() (gas: 25129)
+[PASS] testWithdrawAllERC20ToSafeAddressFailWhenGuardRevokedGovernor() (gas: 48315)
+[PASS] testWithdrawAllERC20ToSafeAddressFailWhenGuardRevokedGuardian() (gas: 50886)
+[PASS] testWithdrawAllERC20ToSafeAddressFailWhenNoRole() (gas: 25445)
+[PASS] testWithdrawAllERC20ToSafeAddressFailWhenNotWhitelist() (gas: 21962)
+[PASS] testWithdrawAllToSafeAddress() (gas: 68108)
+[PASS] testWithdrawAllToSafeAddressFailWhenGuardRevokedGovernor() (gas: 46547)
+[PASS] testWithdrawAllToSafeAddressFailWhenGuardRevokedGuardian() (gas: 49153)
+[PASS] testWithdrawAllToSafeAddressFailWhenNoRole() (gas: 23211)
+[PASS] testWithdrawAlloSafeAddressFailWhenNotWhitelist() (gas: 19715)
+[PASS] testWithdrawERC20ToSafeAddressFailWhenGuardRevokedGovernor() (gas: 50140)
+[PASS] testWithdrawERC20ToSafeAddressFailWhenGuardRevokedGuardian() (gas: 52607)
+[PASS] testWithdrawERC20ToSafeAddressFailWhenNoRole() (gas: 27607)
+[PASS] testWithdrawERC20oSafeAddressFailWhenNotWhitelist() (gas: 24150)
+[PASS] testWithdrawToSafeAddress() (gas: 66851)
+[PASS] testWithdrawToSafeAddressFailWhenGuardRevokedGovernor() (gas: 48264)
+[PASS] testWithdrawToSafeAddressFailWhenGuardRevokedGuardian() (gas: 50871)
+[PASS] testWithdrawToSafeAddressFailWhenNoRole() (gas: 25402)
+[PASS] testWithdrawToSafeAddressFailWhenNotWhitelist() (gas: 21838)
+Test result: ok. 34 passed; 0 failed; finished in 33.85ms
+
+Running 10 tests for contracts/test/unit/pcv/utils/ERC20AllocatorConnector.t.sol:UnitTestERC20AllocatorConnector
+[PASS] testConnectAndRemoveNewDeposit() (gas: 1363694)
+[PASS] testConnectNewDepositFailsTokenMismatch() (gas: 1344233)
+[PASS] testConnectNewDepositFailsUnderlyingTokenMismatch() (gas: 1344278)
+[PASS] testConnectNewDepositSkimToDripFrom() (gas: 1591079)
+[PASS] testCreateDuplicateDepositFails() (gas: 24620)
+[PASS] testCreateNewDepositFailsUnderlyingTokenMismatch() (gas: 2687951)
+[PASS] testDripFailsToNonConnectedAddress(address) (runs: 256, μ: 15788, ~: 15788)
+[PASS] testEditPSMTargetBalanceFailsPsmUnderlyingChanged() (gas: 180236)
+[PASS] testSetTargetBalanceNonExistingPsmFails() (gas: 130986)
+[PASS] testSkimFailsToNonConnectedAddress(address) (runs: 256, μ: 15701, ~: 15701)
+Test result: ok. 10 passed; 0 failed; finished in 39.03ms
+
+Running 12 tests for contracts/test/unit/utils/RateLimitedV2.t.sol:UnitTestRateLimitedV2
+[PASS] testDepleteBuffer(uint128,uint16) (runs: 256, μ: 22136, ~: 25794)
+[PASS] testDepleteBufferFailsWhenZeroBuffer() (gas: 20234)
+[PASS] testDepleteThenReplenishBuffer(uint128,uint128,uint16) (runs: 256, μ: 28172, ~: 27111)
+[PASS] testReplenishBuffer(uint128,uint16) (runs: 256, μ: 30682, ~: 31404)
+[PASS] testReplenishWhenAtBufferCapHasNoEffect(uint128) (runs: 256, μ: 13537, ~: 13537)
+[PASS] testSetBufferCapGovSucceeds() (gas: 30801)
+[PASS] testSetBufferCapNonGovFails() (gas: 14344)
+[PASS] testSetRateLimitPerSecondAboveMaxFails() (gas: 17059)
+[PASS] testSetRateLimitPerSecondGovSucceeds() (gas: 29020)
+[PASS] testSetRateLimitPerSecondNonGovFails() (gas: 14266)
+[PASS] testSetRateLimitPerSecondSucceeds() (gas: 27052)
+[PASS] testSetup() (gas: 13286)
+Test result: ok. 12 passed; 0 failed; finished in 67.82ms
+
+Running 45 tests for contracts/test/unit/pcv/utils/ERC20Allocator.t.sol:UnitTestERC20Allocator
+[PASS] testAllConditionsFalseWhenPaused() (gas: 142927)
+[PASS] testBufferDepletesAndReplenishesCorrectly() (gas: 261973)
+[PASS] testBufferDepletesAndReplenishesCorrectlyMultipleDecimalNormalizedDeposits() (gas: 3849611)
+[PASS] testBufferUpdatesCorrectly() (gas: 261566)
+[PASS] testConnectDepositNonGovFails() (gas: 14567)
+[PASS] testCreateDepositNonGovFails() (gas: 14728)
+[PASS] testDeleteDepositGovSucceeds() (gas: 27065)
+[PASS] testDeleteDepositNonGovFails() (gas: 14419)
+[PASS] testDeletePSMGovSucceeds() (gas: 29270)
+[PASS] testDeletePSMGovSucceedsDripFails() (gas: 36233)
+[PASS] testDeletePSMGovSucceedsDripFailsDeleteDeposit() (gas: 35591)
+[PASS] testDeletePSMGovSucceedsSkimFails() (gas: 36098)
+[PASS] testDeletePSMGovSucceedsSkimFailsDeleteDeposit() (gas: 36628)
+[PASS] testDeletePSMNonGovFails() (gas: 16548)
+[PASS] testDoActionDripSucceedsWhenUnderFullTargetBalance(uint8) (runs: 256, μ: 217770, ~: 217770)
+[PASS] testDoActionFailsWhenUnderTargetWithoutPCVControllerRole() (gas: 116833)
+[PASS] testDoActionNoOpOnNonWhitelistedPSM() (gas: 20223)
+[PASS] testDoActionNoOpWhenUnderTargetWithoutPCVControllerRole() (gas: 29353)
+[PASS] testDoActionSkimSucceedsWhenOverThresholdWithPCVControllerFuzz(uint128) (runs: 256, μ: 165043, ~: 146330)
+[PASS] testDripAndSkimFailsWhenPaused() (gas: 44873)
+[PASS] testDripFailsOnNonWhitelistedPSM() (gas: 20189)
+[PASS] testDripFailsWhenBufferExhausted() (gas: 261410)
+[PASS] testDripFailsWhenBufferZero() (gas: 194307)
+[PASS] testDripFailsWhenUnderFunded() (gas: 177840)
+[PASS] testDripFailsWhenUnderTargetWithoutPCVControllerRole() (gas: 116701)
+[PASS] testDripNoOpWhenUnderTargetWithoutPCVControllerRole() (gas: 50015)
+[PASS] testDripSucceedsWhenBufferFiftyPercentDepleted() (gas: 243180)
+[PASS] testDripSucceedsWhenBufferFiftyPercentDepletedDecimalsNormalized() (gas: 3639644)
+[PASS] testDripSucceedsWhenBufferFiftyPercentDepletedDecimalsNormalizedNegative() (gas: 3639613)
+[PASS] testDripSucceedsWhenOverThreshold() (gas: 217932)
+[PASS] testDripSucceedsWhenOverThresholdAndPSMPartiallyFunded() (gas: 248718)
+[PASS] testDripSucceedsWhenUnderFullTargetBalance(uint8) (runs: 256, μ: 198531, ~: 198531)
+[PASS] testDripperFailsWhenUnderFunded() (gas: 137455)
+[PASS] testGetAdjustedAmountDown(uint128) (runs: 256, μ: 6991, ~: 6991)
+[PASS] testGetAdjustedAmountUp(uint128) (runs: 256, μ: 6683, ~: 6683)
+[PASS] testPullSucceedsWhenOverThresholdWithPCVController() (gas: 219109)
+[PASS] testSetup() (gas: 56236)
+[PASS] testSkimFailsOnNonWhitelistedPSM() (gas: 20211)
+[PASS] testSkimFailsWhenOverTargetWithoutPCVController() (gas: 93596)
+[PASS] testSkimFailsWhenUnderFunded() (gas: 48287)
+[PASS] testSkimSucceedsWhenOverThresholdWithPCVControllerFuzz(uint128) (runs: 256, μ: 175953, ~: 162026)
+[PASS] testSweepGovSucceeds() (gas: 76589)
+[PASS] testSweepNonGovFails() (gas: 16783)
+[PASS] testTargetBalanceGovSucceeds() (gas: 34072)
+[PASS] testeditPSMTargetBalanceNonGovFails() (gas: 14647)
+Test result: ok. 45 passed; 0 failed; finished in 220.07ms
+
+Running 10 tests for contracts/test/unit/oracle/VoltSystemOracle.t.sol:VoltSystemOracleUnitTest
+[PASS] testCompoundBeforePeriodStartFails() (gas: 10763)
+[PASS] testCompoundSucceedsAfterOnePeriod() (gas: 28455)
+[PASS] testLERPPerDay() (gas: 198204)
+[PASS] testLinearInterpolation() (gas: 30104)
+[PASS] testLinearInterpolationFuzz(uint32) (runs: 256, μ: 21821, ~: 24128)
+[PASS] testLinearInterpolationFuzzMultiplePeriods(uint32,uint8) (runs: 256, μ: 1344004, ~: 563838)
+[PASS] testLinearInterpolationUnderYearFuzzPeriods(uint24,uint8) (runs: 256, μ: 842437, ~: 334878)
+[PASS] testMultipleSequentialPeriodCompounds() (gas: 51930321)
+[PASS] testNoLinearInterpolationBeforeStartTime(uint16) (runs: 256, μ: 13584, ~: 13584)
+[PASS] testSetup() (gas: 12398)
+Test result: ok. 10 passed; 0 failed; finished in 1.24s
+
+```
 
 ## License
 

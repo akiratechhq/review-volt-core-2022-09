@@ -1,7 +1,7 @@
  +  Core (ICore, Permissions, Initializable)
-    - [ ] [Ext] init #
+    - [x] [Ext] init #
        - modifiers: initializer
-       - [ ] Why upgradable? Could make `volt` immutable if not upgradable.
+       - [x] Why upgradable? Could make `volt` immutable if not upgradable.
     - [x] [Ext] setVcon #
        - modifiers: onlyGovernor
 
@@ -13,45 +13,49 @@
     - [x] [Ext] setOracleCeilingBasisPoints #
        - modifiers: onlyGovernorOrAdmin
     - [x] [Ext] isPriceValid
-    - [ ] [Int] _allocate #
-       - Not clear where this method is used.
+    - [x] [Int] _allocate #
+       - Not clear where this method is used. In PegStabilityModule (?).
     - [x] [Int] _setCeilingBasisPoints #
         - [x] The check that ceiling is != 0 is not needed.
     - [x] [Int] _setFloorBasisPoints #
-    - [ ] [Int] _validPrice
+    - [x] [Int] _validPrice
         - [x] Consider using `greaterThanOrEqualTo`/`lessThanOrEqualTo`. Will reduce awkward floor/ceiling values like `0.079999999999`.
     - [x] [Int] _validatePriceRange
 
  +  L2Core (ICore, Permissions)
-    - [ ] [Pub] <Constructor> #
-        - [ ] Compare `Core.init` with `L2Core.constructor` and find out why `volt` is `immutable` in this case.
+    - [x] [Pub] <Constructor> #
+        - [x] Compare `Core.init` with `L2Core.constructor` and find out why `volt` is `immutable` in this case.
     - [x] [Ext] setVcon #
        - modifiers: onlyGovernor
 
  +  VoltSystemOracle (IVoltSystemOracle)
     - [x] [Pub] <Constructor> #
-    - [ ] [Pub] getCurrentOraclePrice
-       - [ ] Check this math
+    - [x] [Pub] getCurrentOraclePrice
+       - [x] Check this math
     - [ ] [Ext] compoundInterest #
        - [ ] Can cache value of `getCurrentOraclePrice()` to save gas; useful when emitting the event.
        - [ ] Can use value of `periodEndTime` instead of `periodStartTime` to save gas; useful when emitting the event.
 
-    - [ ] Why is timeframe 30.42 days? Can this be exploited?
+    - [x] Why is timeframe 30.42 days? Can this be exploited?
+          365 / 12 = 30.42
 
  +  OraclePassThrough (IOraclePassThrough, Ownable)
     - [x] [Pub] <Constructor> #
        - modifiers: Ownable
     - [x] [Pub] update #
-    - [ ] [Ext] read
-       - [ ] Have to understand the `.div(1e18)` part.
-       - [ ] Consider having `try/catch`. Might block system.
+    - [x] [Ext] read
+       - [x] Have to understand the `.div(1e18)` part.
+       - [x] Consider having `try/catch`. Might block system.
     - [x] [Ext] getCurrentOraclePrice
-        - [ ] Why does it exist?
+        - [x] Why does it exist?
+              Historical reasons.
     - [x] [Ext] currPegPrice
-        - [ ] Why does it exist?
-    - [ ] [Ext] updateScalingPriceOracle #
+        - [x] Why does it exist?
+              Historical reasons.
+    - [x] [Ext] updateScalingPriceOracle #
        - modifiers: onlyOwner
-       - [ ] Should this force an update? Can someone backrun the oracle update without a price change?
+       - [x] Should this force an update? Can someone backrun the oracle update without a price change? 
+             Not really, value not cached.
 
  +  PCVGuardian (IPCVGuardian, CoreRef)
     - [x] [Pub] <Constructor> #
@@ -68,19 +72,20 @@
        - modifiers: onlyGuardianOrGovernor
     - [x] [Ext] withdrawToSafeAddress #
        - modifiers: hasAnyOfThreeRoles,onlyWhitelist
-    - [ ] [Ext] withdrawAllToSafeAddress #
+    - [x] [Ext] withdrawAllToSafeAddress #
        - modifiers: hasAnyOfThreeRoles,onlyWhitelist
-       - [ ] Make sure `.balance()` reports a correct value. Are there any burned tokens on tranfser? Any conversion not linear?
-    - [ ] [Ext] withdrawERC20ToSafeAddress #
+       - [x] Make sure `.balance()` reports a correct value. Are there any burned tokens on tranfser? Any conversion not linear?
+    - [x] [Ext] withdrawERC20ToSafeAddress #
        - modifiers: hasAnyOfThreeRoles,onlyWhitelist
-    - [ ] [Ext] withdrawAllERC20ToSafeAddress #
+    - [x] [Ext] withdrawAllERC20ToSafeAddress #
        - modifiers: hasAnyOfThreeRoles,onlyWhitelist
-       - [ ] Make sure `.balance()` reports a correct value. Are there any burned tokens on tranfser? Any conversion not linear?
-       - [ ] Why is it allowed to withdraw ANY erc20 token?
-    - [ ] [Int] _withdrawToSafeAddress #
+       - [x] Make sure `.balance()` reports a correct value. Are there any burned tokens on tranfser? Any conversion not linear?
+       - [x] Why is it allowed to withdraw ANY erc20 token?
+    - [x] [Int] _withdrawToSafeAddress #
        - Unpauses `PCVDeposit` if it's paused to allow withdraw.
-    - [ ] [Int] _withdrawERC20ToSafeAddress #
-       - [ ] Handles ANY erc20 token. Is this safe?
+    - [x] [Int] _withdrawERC20ToSafeAddress #
+       - [x] Handles ANY erc20 token. Is this safe?
+         Doesn't do any accounting, so it's safe.
     - [x] [Int] _addWhitelistAddress #
     - [x] [Int] _removeWhitelistAddress #
 
@@ -96,8 +101,8 @@
 
  +  CoreRef (ICoreRef, Pausable)
     - [x] [Pub] <Constructor> #
-    - [ ] [Int] _initialize #
-    - [ ] [Ext] setContractAdminRole #
+    - [x] [Int] _initialize #
+    - [x] [Ext] setContractAdminRole #
        - modifiers: onlyGovernor
     - [x] [Pub] isContractAdmin
     - [x] [Pub] pause #
@@ -113,7 +118,7 @@
       - [ ] Not used. Remove?
     - [ ] [Int] _mintVolt #
       - [ ] Not used. Remove?
-    - [ ] [Int] _setContractAdminRole #
+    - [x] [Int] _setContractAdminRole #
 
     - [ ] `hasAnyOf{number}Roles` could be replaced with an array of roles.
 
@@ -134,7 +139,7 @@
     - [x] [Pub] updateOracle #
     - [ ] [Pub] readOracle
       - [ ] Consider `try/catch` in `readOracle`.
-      - [ ] Will lose precision on scaling down.
+      - [x] Will lose precision on scaling down.
     - [x] [Int] _setOracle #
     - [x] [Int] _setBackupOracle #
     - [ ] [Int] _setDoInvert #
@@ -147,16 +152,60 @@
     
 
  +  ERC20CompoundPCVDeposit (CompoundPCVDepositBase)
-    - [ ] [Pub] <Constructor> #
+    - [x] [Pub] <Constructor> #
        - modifiers: CompoundPCVDepositBase
-    - [ ] [Ext] deposit #
+    - [x] [Ext] deposit #
        - modifiers: whenNotPaused
-       - [ ] Don't get why approve and mint. Why not transferFrom or burn? Why is approve needed?
-       - [ ] Something is weird in here
-    - [ ] [Int] _transferUnderlying #
+       - [x] Don't get why approve and mint. Why not transferFrom or burn? Why is approve needed?
+       - [x] Something is weird in here
+    - [x] [Int] _transferUnderlying #
        - Not used. Remove?
-    - [ ] [Pub] balanceReportedIn
-       - [ ] Is this really connected to `CompoundPCVDepositBase.balance()`? It looks like it's not strongly connected.
+    - [x] [Pub] balanceReportedIn
+       - [x] Is this really connected to `CompoundPCVDepositBase.balance()`? It looks like it's not strongly connected.
+
+ +  ERC20Allocator (IERC20Allocator, CoreRef, RateLimitedV2)
+    - [x] [Pub] <Constructor> #
+       - modifiers: CoreRef,RateLimitedV2
+    - [x] [Ext] connectPSM #
+       - modifiers: onlyGovernor
+    - [x] [Ext] editPSMTargetBalance #
+       - modifiers: onlyGovernor
+    - [x] [Ext] disconnectPSM #
+       - modifiers: onlyGovernor
+    - [x] [Ext] connectDeposit #
+       - modifiers: onlyGovernor
+    - [x] [Ext] deleteDeposit #
+       - modifiers: onlyGovernor
+    - [x] [Ext] sweep #
+       - modifiers: onlyGovernor
+    - [x] [Ext] skim #
+       - modifiers: whenNotPaused
+    - [x] [Int] _skim #
+    - [x] [Ext] drip #
+       - modifiers: whenNotPaused
+    - [x] [Int] _drip #
+    - [x] [Ext] doAction #
+       - modifiers: whenNotPaused
+    - [x] [Ext] targetBalance
+    - [x] [Pub] getAdjustedAmount
+    - [x] [Pub] getSkimDetails
+       - [ ] Check this again
+    - [x] [Pub] getDripDetails
+    - [x] [Ext] checkDripCondition
+    - [x] [Ext] checkSkimCondition
+    - [x] [Ext] checkActionAllowed
+    - [x] [Int] _checkDripCondition
+      - [x] Is `.balance()` always in sync with `.balanceOf()`?
+    - [x] [Int] _checkSkimCondition
+      - [x] Is `.balance()` always in sync with `.balanceOf()`?
+
+
+
+ ($) = payable function
+ # = non-constant function
+  
+
+
 
  ($) = payable function
  # = non-constant function

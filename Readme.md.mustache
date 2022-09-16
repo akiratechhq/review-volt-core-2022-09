@@ -10,6 +10,7 @@
 - **Reviewers** Daniel Luca ([@cleanunicorn](https://twitter.com/cleanunicorn)), Andrei Simion ([@andreiashu](https://twitter.com/andreiashu))
 - **Repository**: [{{project_name}}]({{source_repository}})
 - **Commit hash** `{{commit_hash}}`
+- **Final commit hash** `{{final_commit_hash}}`
 - **Technologies**
   - Solidity
   - Node.JS
@@ -30,17 +31,21 @@ The review was conducted over the course of **{{review_period}}** from **{{date_
 
 ### Week 1
 
-During the first week, we ...
+During the first week, we started to manually review the code and the provided documents. The code is well documented and of good quality, but it's highly modular and it's hard to understand the overall architecture. We started to write a high-level architecture diagram and we started to write a list of the most important contracts.
 
-### Week 2
+We identified a few low severity issues, but we didn't find any critical issues. We also identified a few issues that could be improved, but they don't represent a security risk.
 
-The second week was ...
+On Wednesday, we set up a meeting with the client to discuss the architecture and the issues we found. The dev team needed us to check a new PR that is about to hit the mainnet. This PR is identified by commit hash `{{final_commit_hash}}`. The scope was extended to include the file `contracts/pcv/utils/ERC20Allocator.sol`.
+
+On Thursday, we focused on the newly added file. We had another meeting with the client where we discussed details in the implementation of the new contract.
+
+On Friday, we made sure we didn't have any open or unfinished issues and had another meeting with the client to deliver the report and discuss any open questions.
 
 ## Scope
 
-The initial review focused on the [{{project_name}}]({{source_repository}}) repository, identified by the commit hash `{{commit_hash}}`. ...
+The initial review focused on the [{{project_name}}]({{source_repository}}) repository, identified by the commit hash `{{commit_hash}}`. Later during the week, another file was added to the scope, identified by the commit hash `{{final_commit_hash}}`.
 
-<!-- We focused on manually reviewing the codebase, searching for security issues such as, but not limited to, re-entrancy problems, transaction ordering, block timestamp dependency, exception handling, call stack depth limitation, integer overflow/underflow, self-destructible contracts, unsecured balance, use of origin, costly gas patterns, architectural problems, code readability. -->
+We focused on manually reviewing the codebase, searching for security issues such as, but not limited to, re-entrancy problems, transaction ordering, block timestamp dependency, exception handling, call stack depth limitation, integer overflow/underflow, self-destructible contracts, unsecured balance, use of origin, costly gas patterns, architectural problems, code readability.
 
 **Includes:**
 - PriceBoundPSM
@@ -54,7 +59,7 @@ The initial review focused on the [{{project_name}}]({{source_repository}}) repo
 - CoreRef
 - OracleRef
 - ERC20CompoundPCVDeposit
-- ERC20Allocator - was not found in the repository
+- ERC20Allocator - added later in the scope
 
 Documents:
 
@@ -81,39 +86,11 @@ We identified a few possible general improvements that are not security issues d
 
 ## Artifacts
 
-### Surya
+### Architecture
 
-Sūrya is a utility tool for smart contract systems. It provides a number of visual outputs and information about the structure of smart contracts. It also supports querying the function call graph in multiple ways to aid in the manual inspection and control flow analysis of contracts.
+The architecture is extremely hard to understand and it's not well documented. We started to work on a high-level architecture diagram.
 
-<!-- **Contracts Description Table**
-
-```text
-surya mdreport report.md Contract.sol
-```
-
--->
-
-#### Graphs
-
-<!-- ***Contract***
-
-```text
-surya graph Contract.sol | dot -Tpng > ./static/Contract_graph.png
-```
-
-![Contract Graph](./static/Contract_graph.png)
-
-```text
-surya inheritance Contract.sol | dot -Tpng > ./static/Contract_inheritance.png
-```
-
-![Contract Inheritance](./static/Contract_inheritance.png)
-
-```text
-Use Solidity Visual Auditor
-```
-
-![Contract UML](./static/Contract_uml.png) -->
+![static/Volt-Diagram-Drawio.png](static/Volt-Diagram-Drawio.svg)
 
 #### Describe
 
@@ -291,17 +268,336 @@ Legend
  # = non-constant function
 ```
 
-### Coverage
-
-<!-- ```text
-$ npm run coverage
-``` -->
-
 ### Tests
 
-<!-- ```text
-$ npx buidler test
-``` -->
+```text
+$ npm run test
+
+
+> @voltprotocol/volt-protocol-core@1.0.0 test
+> forge test --match-contract UnitTest -vvv
+
+[⠒] Compiling...
+[⠑] Compiling 1 files with 0.4.26
+[⠘] Compiling 71 files with 0.8.13
+[⠃] Compiling 78 files with 0.8.16
+[⠔] Solc 0.4.26 finished in 36.38ms
+[⠊] Solc 0.8.16 finished in 4.48s
+[⠘] Solc 0.8.13 finished in 10.90s
+Compiler run successful (with warnings)
+contracts/external/WETH9.sol:47:9: Warning: Invoking events without "emit" prefix is deprecated.
+        Deposit(msg.sender, msg.value);
+        ^----------------------------^
+
+
+contracts/external/WETH9.sol:54:9: Warning: Invoking events without "emit" prefix is deprecated.
+        Withdrawal(msg.sender, wad);
+        ^-------------------------^
+
+
+contracts/external/WETH9.sol:58:16: Warning: Using contract member "balance" inherited from the address type is deprecated. Convert the contract to "address" type to access the member, for example use "address(contract).balance" instead.
+        return this.balance;
+               ^----------^
+
+
+contracts/external/WETH9.sol:63:9: Warning: Invoking events without "emit" prefix is deprecated.
+        Approval(msg.sender, guy, wad);
+        ^----------------------------^
+
+
+contracts/external/WETH9.sol:86:9: Warning: Invoking events without "emit" prefix is deprecated.
+        Transfer(src, dst, wad);
+        ^---------------------^
+
+
+warning[8760]: Warning: This declaration has the same name as another declaration.
+  --> contracts/pcv/utils/ERC20Allocator.sol:79:9:
+   |
+79 |         uint248 targetBalance,
+   |         ^^^^^^^^^^^^^^^^^^^^^
+Note: The other declaration is here:
+   --> contracts/pcv/utils/ERC20Allocator.sol:280:5:
+    |
+280 |     function targetBalance(address psm) external view returns (uint256) {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+
+warning[8760]: Warning: This declaration has the same name as another declaration.
+   --> contracts/pcv/utils/ERC20Allocator.sol:104:48:
+    |
+104 |     function editPSMTargetBalance(address psm, uint248 targetBalance)
+    |                                                ^^^^^^^^^^^^^^^^^^^^^
+Note: The other declaration is here:
+   --> contracts/pcv/utils/ERC20Allocator.sol:280:5:
+    |
+280 |     function targetBalance(address psm) external view returns (uint256) {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+
+warning[2072]: Warning: Unused local variable.
+  --> contracts/test/integration/vip/vip8.sol:94:9:
+   |
+94 |         uint256 daiBalance = PegStabilityModule(MainnetAddresses.FEI_DAI_PSM)
+   |         ^^^^^^^^^^^^^^^^^^
+
+
+
+warning[2072]: Warning: Unused local variable.
+   --> contracts/test/unit/pcv/utils/ERC20Allocator.t.sol:619:9:
+    |
+619 |         uint256 skimAmount = (bufferCap - bufferEnd) * 2;
+    |         ^^^^^^^^^^^^^^^^^^
+
+
+
+warning[2018]: Warning: Function state mutability can be restricted to view
+   --> contracts/test/integration/vip/vip10.sol:121:5:
+    |
+121 |     function getMainnetProposal()
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+
+warning[2018]: Warning: Function state mutability can be restricted to pure
+   --> contracts/test/integration/vip/vip10.sol:185:5:
+    |
+185 |     function arbitrumSetup() public override {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+
+warning[2018]: Warning: Function state mutability can be restricted to pure
+   --> contracts/test/integration/vip/vip10.sol:189:5:
+    |
+189 |     function arbitrumValidate() public override {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+
+warning[2018]: Warning: Function state mutability can be restricted to pure
+   --> contracts/test/integration/vip/vip8.sol:141:5:
+    |
+141 |     function arbitrumSetup() public override {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+
+warning[2018]: Warning: Function state mutability can be restricted to pure
+   --> contracts/test/integration/vip/vip8.sol:145:5:
+    |
+145 |     function arbitrumValidate() public override {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+
+warning[2018]: Warning: Function state mutability can be restricted to pure
+   --> contracts/test/integration/vip/vip9.sol:110:5:
+    |
+110 |     function arbitrumSetup() public override {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+
+warning[2018]: Warning: Function state mutability can be restricted to pure
+   --> contracts/test/integration/vip/vip9.sol:114:5:
+    |
+114 |     function arbitrumValidate() public override {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+
+
+Running 2 tests for contracts/test/unit/Volt.t.sol:UnitTestVolt
+[PASS] testDeployedMetaData() (gas: 17541)
+[PASS] testMintsVolt() (gas: 70031)
+Test result: ok. 2 passed; 0 failed; finished in 8.31ms
+
+Running 2 tests for contracts/test/unit/core/Core.t.sol:UnitTestCore
+[PASS] testGovernorSetsVcon() (gas: 22417)
+[PASS] testNonGovernorFailsSettingVcon() (gas: 13096)
+Test result: ok. 2 passed; 0 failed; finished in 7.28ms
+
+Running 4 tests for contracts/test/unit/oracle/OraclePassThrough.t.sol:UnitTestOraclePassThrough
+[PASS] testDataPassThroughSync() (gas: 23897)
+[PASS] testSetup() (gas: 12820)
+[PASS] testUpdateScalingPriceOracleFailureNotGovernor() (gas: 13697)
+[PASS] testUpdateScalingPriceOracleSuccess() (gas: 244964)
+Test result: ok. 4 passed; 0 failed; finished in 10.97ms
+
+Running 6 tests for contracts/test/unit/utils/KArrayTree.t.sol:KArrayTreeUnitTest
+[PASS] testAddDuplicateFails() (gas: 5643)
+[PASS] testAddDuplicateFailsFind() (gas: 39737)
+[PASS] testCanChangeRole() (gas: 40888)
+[PASS] testCannotChangeToExistingRole() (gas: 5672)
+[PASS] testFree() (gas: 52596)
+[PASS] testSetup() (gas: 46808)
+Test result: ok. 6 passed; 0 failed; finished in 452.71µs
+
+Running 3 tests for contracts/test/unit/utils/Deviation.t.sol:UnitTestDeviation
+[PASS] testDeviation() (gas: 1332)
+[PASS] testOutsideDeviation() (gas: 3350)
+[PASS] testWithinDeviation() (gas: 3120)
+Test result: ok. 3 passed; 0 failed; finished in 179.65µs
+
+Running 3 tests for contracts/test/unit/core/L2Core.t.sol:UnitTestL2Core
+[PASS] testGovernorSetsVcon() (gas: 39600)
+[PASS] testNonGovernorFailsSettingVcon() (gas: 13129)
+[PASS] testSetup() (gas: 57635)
+Test result: ok. 3 passed; 0 failed; finished in 955.64µs
+
+Running 7 tests for contracts/test/unit/pcv/PCVGuardAdmin.t.sol:UnitTestPCVGuardAdmin
+[PASS] testGrantPCVGuard() (gas: 99226)
+[PASS] testGrantPCVGuardFailWhenGuardian() (gas: 17065)
+[PASS] testGrantPCVGuardFailWhenNoRoles() (gas: 14577)
+[PASS] testPCVGuardAdminRole() (gas: 10163)
+[PASS] testRevokePCVGuardFailWhenNoRole() (gas: 19918)
+[PASS] testRevokePCVGuardGovernor() (gas: 36082)
+[PASS] testRevokePCVGuardGuardian() (gas: 38636)
+Test result: ok. 7 passed; 0 failed; finished in 1.66ms
+
+Running 11 tests for contracts/test/unit/pcv/ERC20HoldingPCVDeposit.t.sol:UnitTestERC20HoldingsPCVDeposit
+[PASS] testDepositFailsOnPause() (gas: 40859)
+[PASS] testDepositNoOp() (gas: 7591)
+[PASS] testWithdrawAllFailsNonPCVController() (gas: 17439)
+[PASS] testWithdrawAllSucceeds() (gas: 82588)
+[PASS] testWithdrawERC20FailsNonPCVController() (gas: 16553)
+[PASS] testWithdrawERC20Succeeds() (gas: 82261)
+[PASS] testWithdrawEthFailsNonPCVController() (gas: 14410)
+[PASS] testWithdrawEthSucceeds() (gas: 51551)
+[PASS] testWithdrawFailsNonPCVController() (gas: 17497)
+[PASS] testWithdrawSucceeds() (gas: 81625)
+[PASS] testWrapEthFailsWhenNotOnMainnetOrArbitrum() (gas: 9021)
+Test result: ok. 11 passed; 0 failed; finished in 22.95ms
+
+Running 34 tests for contracts/test/unit/pcv/PCVGuardian.t.sol:UnitTestPCVGuardian
+[PASS] testAddWhiteListAddress() (gas: 68365)
+[PASS] testGovernorWithdrawAllERC20ToSafeAddress() (gas: 62208)
+[PASS] testGovernorWithdrawERC20ToSafeAddress() (gas: 61455)
+[PASS] testGuardianWithdrawAllERC20ToSafeAddress() (gas: 65460)
+[PASS] testGuardianWithdrawAllToSafeAddress() (gas: 71328)
+[PASS] testGuardianWithdrawERC20ToSafeAddress() (gas: 64622)
+[PASS] testGuardianWithdrawToSafeAddress() (gas: 70016)
+[PASS] testPCVGuardAdminRole() (gas: 10202)
+[PASS] testPCVGuardWithdrawAllERC20ToSafeAddress() (gas: 68592)
+[PASS] testPCVGuardWithdrawAllToSafeAddress() (gas: 74451)
+[PASS] testPCVGuardWithdrawERC20ToSafeAddress() (gas: 67830)
+[PASS] testPCVGuardWithdrawToSafeAddress() (gas: 73213)
+[PASS] testPCVGuardianRoles() (gas: 13642)
+[PASS] testPausedAfterWithdrawAllToSafeAddress() (gas: 105301)
+[PASS] testPausedAfterWithdrawToSafeAddress() (gas: 104032)
+[PASS] testRemoveWhiteListAddress() (gas: 25129)
+[PASS] testWithdrawAllERC20ToSafeAddressFailWhenGuardRevokedGovernor() (gas: 48315)
+[PASS] testWithdrawAllERC20ToSafeAddressFailWhenGuardRevokedGuardian() (gas: 50886)
+[PASS] testWithdrawAllERC20ToSafeAddressFailWhenNoRole() (gas: 25445)
+[PASS] testWithdrawAllERC20ToSafeAddressFailWhenNotWhitelist() (gas: 21962)
+[PASS] testWithdrawAllToSafeAddress() (gas: 68108)
+[PASS] testWithdrawAllToSafeAddressFailWhenGuardRevokedGovernor() (gas: 46547)
+[PASS] testWithdrawAllToSafeAddressFailWhenGuardRevokedGuardian() (gas: 49153)
+[PASS] testWithdrawAllToSafeAddressFailWhenNoRole() (gas: 23211)
+[PASS] testWithdrawAlloSafeAddressFailWhenNotWhitelist() (gas: 19715)
+[PASS] testWithdrawERC20ToSafeAddressFailWhenGuardRevokedGovernor() (gas: 50140)
+[PASS] testWithdrawERC20ToSafeAddressFailWhenGuardRevokedGuardian() (gas: 52607)
+[PASS] testWithdrawERC20ToSafeAddressFailWhenNoRole() (gas: 27607)
+[PASS] testWithdrawERC20oSafeAddressFailWhenNotWhitelist() (gas: 24150)
+[PASS] testWithdrawToSafeAddress() (gas: 66851)
+[PASS] testWithdrawToSafeAddressFailWhenGuardRevokedGovernor() (gas: 48264)
+[PASS] testWithdrawToSafeAddressFailWhenGuardRevokedGuardian() (gas: 50871)
+[PASS] testWithdrawToSafeAddressFailWhenNoRole() (gas: 25402)
+[PASS] testWithdrawToSafeAddressFailWhenNotWhitelist() (gas: 21838)
+Test result: ok. 34 passed; 0 failed; finished in 33.85ms
+
+Running 10 tests for contracts/test/unit/pcv/utils/ERC20AllocatorConnector.t.sol:UnitTestERC20AllocatorConnector
+[PASS] testConnectAndRemoveNewDeposit() (gas: 1363694)
+[PASS] testConnectNewDepositFailsTokenMismatch() (gas: 1344233)
+[PASS] testConnectNewDepositFailsUnderlyingTokenMismatch() (gas: 1344278)
+[PASS] testConnectNewDepositSkimToDripFrom() (gas: 1591079)
+[PASS] testCreateDuplicateDepositFails() (gas: 24620)
+[PASS] testCreateNewDepositFailsUnderlyingTokenMismatch() (gas: 2687951)
+[PASS] testDripFailsToNonConnectedAddress(address) (runs: 256, μ: 15788, ~: 15788)
+[PASS] testEditPSMTargetBalanceFailsPsmUnderlyingChanged() (gas: 180236)
+[PASS] testSetTargetBalanceNonExistingPsmFails() (gas: 130986)
+[PASS] testSkimFailsToNonConnectedAddress(address) (runs: 256, μ: 15701, ~: 15701)
+Test result: ok. 10 passed; 0 failed; finished in 39.03ms
+
+Running 12 tests for contracts/test/unit/utils/RateLimitedV2.t.sol:UnitTestRateLimitedV2
+[PASS] testDepleteBuffer(uint128,uint16) (runs: 256, μ: 22136, ~: 25794)
+[PASS] testDepleteBufferFailsWhenZeroBuffer() (gas: 20234)
+[PASS] testDepleteThenReplenishBuffer(uint128,uint128,uint16) (runs: 256, μ: 28172, ~: 27111)
+[PASS] testReplenishBuffer(uint128,uint16) (runs: 256, μ: 30682, ~: 31404)
+[PASS] testReplenishWhenAtBufferCapHasNoEffect(uint128) (runs: 256, μ: 13537, ~: 13537)
+[PASS] testSetBufferCapGovSucceeds() (gas: 30801)
+[PASS] testSetBufferCapNonGovFails() (gas: 14344)
+[PASS] testSetRateLimitPerSecondAboveMaxFails() (gas: 17059)
+[PASS] testSetRateLimitPerSecondGovSucceeds() (gas: 29020)
+[PASS] testSetRateLimitPerSecondNonGovFails() (gas: 14266)
+[PASS] testSetRateLimitPerSecondSucceeds() (gas: 27052)
+[PASS] testSetup() (gas: 13286)
+Test result: ok. 12 passed; 0 failed; finished in 67.82ms
+
+Running 45 tests for contracts/test/unit/pcv/utils/ERC20Allocator.t.sol:UnitTestERC20Allocator
+[PASS] testAllConditionsFalseWhenPaused() (gas: 142927)
+[PASS] testBufferDepletesAndReplenishesCorrectly() (gas: 261973)
+[PASS] testBufferDepletesAndReplenishesCorrectlyMultipleDecimalNormalizedDeposits() (gas: 3849611)
+[PASS] testBufferUpdatesCorrectly() (gas: 261566)
+[PASS] testConnectDepositNonGovFails() (gas: 14567)
+[PASS] testCreateDepositNonGovFails() (gas: 14728)
+[PASS] testDeleteDepositGovSucceeds() (gas: 27065)
+[PASS] testDeleteDepositNonGovFails() (gas: 14419)
+[PASS] testDeletePSMGovSucceeds() (gas: 29270)
+[PASS] testDeletePSMGovSucceedsDripFails() (gas: 36233)
+[PASS] testDeletePSMGovSucceedsDripFailsDeleteDeposit() (gas: 35591)
+[PASS] testDeletePSMGovSucceedsSkimFails() (gas: 36098)
+[PASS] testDeletePSMGovSucceedsSkimFailsDeleteDeposit() (gas: 36628)
+[PASS] testDeletePSMNonGovFails() (gas: 16548)
+[PASS] testDoActionDripSucceedsWhenUnderFullTargetBalance(uint8) (runs: 256, μ: 217770, ~: 217770)
+[PASS] testDoActionFailsWhenUnderTargetWithoutPCVControllerRole() (gas: 116833)
+[PASS] testDoActionNoOpOnNonWhitelistedPSM() (gas: 20223)
+[PASS] testDoActionNoOpWhenUnderTargetWithoutPCVControllerRole() (gas: 29353)
+[PASS] testDoActionSkimSucceedsWhenOverThresholdWithPCVControllerFuzz(uint128) (runs: 256, μ: 165043, ~: 146330)
+[PASS] testDripAndSkimFailsWhenPaused() (gas: 44873)
+[PASS] testDripFailsOnNonWhitelistedPSM() (gas: 20189)
+[PASS] testDripFailsWhenBufferExhausted() (gas: 261410)
+[PASS] testDripFailsWhenBufferZero() (gas: 194307)
+[PASS] testDripFailsWhenUnderFunded() (gas: 177840)
+[PASS] testDripFailsWhenUnderTargetWithoutPCVControllerRole() (gas: 116701)
+[PASS] testDripNoOpWhenUnderTargetWithoutPCVControllerRole() (gas: 50015)
+[PASS] testDripSucceedsWhenBufferFiftyPercentDepleted() (gas: 243180)
+[PASS] testDripSucceedsWhenBufferFiftyPercentDepletedDecimalsNormalized() (gas: 3639644)
+[PASS] testDripSucceedsWhenBufferFiftyPercentDepletedDecimalsNormalizedNegative() (gas: 3639613)
+[PASS] testDripSucceedsWhenOverThreshold() (gas: 217932)
+[PASS] testDripSucceedsWhenOverThresholdAndPSMPartiallyFunded() (gas: 248718)
+[PASS] testDripSucceedsWhenUnderFullTargetBalance(uint8) (runs: 256, μ: 198531, ~: 198531)
+[PASS] testDripperFailsWhenUnderFunded() (gas: 137455)
+[PASS] testGetAdjustedAmountDown(uint128) (runs: 256, μ: 6991, ~: 6991)
+[PASS] testGetAdjustedAmountUp(uint128) (runs: 256, μ: 6683, ~: 6683)
+[PASS] testPullSucceedsWhenOverThresholdWithPCVController() (gas: 219109)
+[PASS] testSetup() (gas: 56236)
+[PASS] testSkimFailsOnNonWhitelistedPSM() (gas: 20211)
+[PASS] testSkimFailsWhenOverTargetWithoutPCVController() (gas: 93596)
+[PASS] testSkimFailsWhenUnderFunded() (gas: 48287)
+[PASS] testSkimSucceedsWhenOverThresholdWithPCVControllerFuzz(uint128) (runs: 256, μ: 175953, ~: 162026)
+[PASS] testSweepGovSucceeds() (gas: 76589)
+[PASS] testSweepNonGovFails() (gas: 16783)
+[PASS] testTargetBalanceGovSucceeds() (gas: 34072)
+[PASS] testeditPSMTargetBalanceNonGovFails() (gas: 14647)
+Test result: ok. 45 passed; 0 failed; finished in 220.07ms
+
+Running 10 tests for contracts/test/unit/oracle/VoltSystemOracle.t.sol:VoltSystemOracleUnitTest
+[PASS] testCompoundBeforePeriodStartFails() (gas: 10763)
+[PASS] testCompoundSucceedsAfterOnePeriod() (gas: 28455)
+[PASS] testLERPPerDay() (gas: 198204)
+[PASS] testLinearInterpolation() (gas: 30104)
+[PASS] testLinearInterpolationFuzz(uint32) (runs: 256, μ: 21821, ~: 24128)
+[PASS] testLinearInterpolationFuzzMultiplePeriods(uint32,uint8) (runs: 256, μ: 1344004, ~: 563838)
+[PASS] testLinearInterpolationUnderYearFuzzPeriods(uint24,uint8) (runs: 256, μ: 842437, ~: 334878)
+[PASS] testMultipleSequentialPeriodCompounds() (gas: 51930321)
+[PASS] testNoLinearInterpolationBeforeStartTime(uint16) (runs: 256, μ: 13584, ~: 13584)
+[PASS] testSetup() (gas: 12398)
+Test result: ok. 10 passed; 0 failed; finished in 1.24s
+
+```
 
 ## License
 
