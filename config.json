@@ -36,6 +36,15 @@
                     "name": "Medium",
                     "node_id": "LA_kwDOH-H9kc8AAAABDUhK4g",
                     "url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/labels/Medium"
+                },
+                {
+                    "color": "007AFF",
+                    "default": false,
+                    "description": null,
+                    "id": 4517808974,
+                    "name": "Acknowledged",
+                    "node_id": "LA_kwDOH-H9kc8AAAABDUhLTg",
+                    "url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/labels/Acknowledged"
                 }
             ],
             "labels_url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/issues/8/labels{/name}",
@@ -61,7 +70,7 @@
             "state_reason": null,
             "timeline_url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/issues/8/timeline",
             "title": "Setting the backup oracle should impose the same restrictions everywhere",
-            "updated_at": "2022-09-18T07:10:47Z",
+            "updated_at": "2022-09-18T07:58:24Z",
             "url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/issues/8",
             "user": {
                 "avatar_url": "https://avatars.githubusercontent.com/u/547012?v=4",
@@ -115,6 +124,15 @@
                     "name": "Medium",
                     "node_id": "LA_kwDOH-H9kc8AAAABDUhK4g",
                     "url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/labels/Medium"
+                },
+                {
+                    "color": "007AFF",
+                    "default": false,
+                    "description": null,
+                    "id": 4517808974,
+                    "name": "Acknowledged",
+                    "node_id": "LA_kwDOH-H9kc8AAAABDUhLTg",
+                    "url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/labels/Acknowledged"
                 }
             ],
             "labels_url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/issues/7/labels{/name}",
@@ -140,7 +158,7 @@
             "state_reason": null,
             "timeline_url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/issues/7/timeline",
             "title": "Setting the invert flag in `OracleRef` might have unexpected consequences",
-            "updated_at": "2022-09-18T06:52:06Z",
+            "updated_at": "2022-09-18T07:58:34Z",
             "url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/issues/7",
             "user": {
                 "avatar_url": "https://avatars.githubusercontent.com/u/547012?v=4",
@@ -194,6 +212,15 @@
                     "name": "Minor",
                     "node_id": "LA_kwDOH-H9kc8AAAABDUhK2A",
                     "url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/labels/Minor"
+                },
+                {
+                    "color": "007AFF",
+                    "default": false,
+                    "description": null,
+                    "id": 4517808974,
+                    "name": "Acknowledged",
+                    "node_id": "LA_kwDOH-H9kc8AAAABDUhLTg",
+                    "url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/labels/Acknowledged"
                 }
             ],
             "labels_url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/issues/6/labels{/name}",
@@ -219,7 +246,7 @@
             "state_reason": null,
             "timeline_url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/issues/6/timeline",
             "title": "Method `compoundInterest` can be gas optimized when emitting event",
-            "updated_at": "2022-09-18T05:16:17Z",
+            "updated_at": "2022-09-18T07:58:47Z",
             "url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/issues/6",
             "user": {
                 "avatar_url": "https://avatars.githubusercontent.com/u/547012?v=4",
@@ -431,6 +458,15 @@
                     "name": "Minor",
                     "node_id": "LA_kwDOH-H9kc8AAAABDUhK2A",
                     "url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/labels/Minor"
+                },
+                {
+                    "color": "007AFF",
+                    "default": false,
+                    "description": null,
+                    "id": 4517808974,
+                    "name": "Acknowledged",
+                    "node_id": "LA_kwDOH-H9kc8AAAABDUhLTg",
+                    "url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/labels/Acknowledged"
                 }
             ],
             "labels_url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/issues/3/labels{/name}",
@@ -456,7 +492,7 @@
             "state_reason": null,
             "timeline_url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/issues/3/timeline",
             "title": "`_validPrice` can include floor and ceiling values when checking the validity",
-            "updated_at": "2022-09-13T15:00:21Z",
+            "updated_at": "2022-09-18T07:58:04Z",
             "url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/issues/3",
             "user": {
                 "avatar_url": "https://avatars.githubusercontent.com/u/547012?v=4",
@@ -510,6 +546,15 @@
                     "name": "Minor",
                     "node_id": "LA_kwDOH-H9kc8AAAABDUhK2A",
                     "url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/labels/Minor"
+                },
+                {
+                    "color": "007AFF",
+                    "default": false,
+                    "description": null,
+                    "id": 4517808974,
+                    "name": "Acknowledged",
+                    "node_id": "LA_kwDOH-H9kc8AAAABDUhLTg",
+                    "url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/labels/Acknowledged"
                 }
             ],
             "labels_url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/issues/2/labels{/name}",
@@ -535,7 +580,7 @@
             "state_reason": null,
             "timeline_url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/issues/2/timeline",
             "title": "Setting ceiling basis points does not need a non zero validation",
-            "updated_at": "2022-09-12T14:26:56Z",
+            "updated_at": "2022-09-18T07:58:11Z",
             "url": "https://api.github.com/repos/akiratechhq/review-volt-core-2022-09/issues/2",
             "user": {
                 "avatar_url": "https://avatars.githubusercontent.com/u/547012?v=4",

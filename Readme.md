@@ -48,12 +48,12 @@
      - [Week 1](#week-1)
  - [Scope](#scope)
  - [Issues](#issues)
-     - [Oracle implementation can be made more robust](#oracle-implementation-can-be-made-more-robust)
      - [Setting the backup oracle should impose the same restrictions everywhere](#setting-the-backup-oracle-should-impose-the-same-restrictions-everywhere)
      - [Setting the invert flag in OracleRef might have unexpected consequences](#setting-the-invert-flag-in-oracleref-might-have-unexpected-consequences)
      - [Method compoundInterest can be gas optimized when emitting event](#method-compoundinterest-can-be-gas-optimized-when-emitting-event)
      - [_validPrice can include floor and ceiling values when checking the validity](#_validprice-can-include-floor-and-ceiling-values-when-checking-the-validity)
      - [Setting ceiling basis points does not need a non zero validation](#setting-ceiling-basis-points-does-not-need-a-non-zero-validation)
+     - [Oracle implementation can be made more robust](#oracle-implementation-can-be-made-more-robust)
  - [Artifacts](#artifacts)
      - [Architecture](#architecture)
      - [Tests](#tests)
@@ -78,8 +78,8 @@
 | SEVERITY       |    OPEN    |    CLOSED    |
 |----------------|:----------:|:------------:|
 |  Informational  |  0  |  1  |
-|  Minor  |  3  |  0  |
-|  Medium  |  2  |  0  |
+|  Minor  |  0  |  3  |
+|  Medium  |  0  |  2  |
 |  Major  |  0  |  0  |
 
 ## Executive summary
@@ -130,113 +130,8 @@ Documents:
 ## Issues
 
 
-### [Oracle implementation can be made more robust](https://github.com/akiratechhq/review-volt-core-2022-09/issues/5)
-![Issue status: Acknowledged](https://img.shields.io/static/v1?label=Status&message=Acknowledged&color=007AFF&style=flat-square) ![Informational](https://img.shields.io/static/v1?label=Severity&message=Informational&color=34C759&style=flat-square)
-
-**Description**
-
-The current oracle implementation does not account for external systems failures. There is no immediate threat, but the oracle system must be a very robust and trusted component.
-
-Consider this approach for implementing an oracle system.
-
-We define a base class that handles passing the value obtained from an oracle implementation. This class implements a robust approach for getting the value, even if the implementation fails. 
-
-```solidity
-abstract contract OracleBase {
-    function value() external returns (uint256 value_, bool valid_) {
-        // Try to get the value
-        try this.obtainValue() returns (uint256 valueReturned, bool valid) {
-            // Prepare the value to be returned
-            value_ = valueReturned;
-            // Pass the valid bool
-            valid_ = valid;
-        } catch {
-            value_ = 0;
-            valid_ = false;
-        }
-
-        return (value_, valid_);
-    }
-
-    function obtainValue() external virtual returns (uint256 value, bool valid);
-}
-```
-
-The call to `obtainValue()` can fail because of external calls or improper developer implementation. Whatever the case, the base class can handle these fails and can do much more if multiple fails happen in a row, or provide a cached value, or notify a system that they're offline.
-
-Any oracle will use this base class and must implement `obtainValue` specific to the value they need to retrieve.
-
-```solidity
-
-contract OracleImplementation is OracleBase {
-    ExternalContract immutable public ec;
-
-    constructor(ExternalContract _ec) {
-        // Save the external provider's address
-        ec = _ec;
-    }
-
-    function obtainValue() override(OracleBase) external returns (uint256, bool) {
-        // Make sure this is not called externally by anyone else. 
-        require(msg.sender == address(this), "Oracle must call itself to get the value");
-
-        // Talk to `ExternalContract` and get the scale
-        uint256 scale = ec.getScale();
-
-        // Sometimes you need to do something with the value
-        scale = scale / 10;
-
-        // Validate the processed value
-        bool valid = scale <= 42;
-
-        // Return scale
-        return (scale, valid);
-    }
-}
-```
-
-In this case, `OracleImplementation` talks to an external system, and they don't need to account for any failures, unexpected upgrades or weird behavior.
-
-Its only purpose is to obtain the value, process it (if necessary), validate it and return the value if the validity.
-
-`OracleBase` should not care what the value represents, its purpose is to handle failures and pass on the values.
-
-`OracleImplementation` has to understand the value obtained and must know how to process and validate it.
-
-Finally, we tested this with an implementation that returns a value or sometimes fails to ensure our example implementation holds.
-
-```solidity
-contract ExternalContract {
-    function getScale() public view returns (uint256 scale_) {
-        // Simulate random reverts
-        if (block.number % 2 == 0) {
-            // fail
-            revert("Sometimes it fails");
-        } else {
-            // return a value, do not fail
-            return 12;
-        }
-    }
-}
-```
-
-Separating the concerns between `OracleBase` and `OracleImplementation` allows for:
-
-- adding new developers that do not have to understand the whole system in order to develop an oracle;
-- protecting from unexpected external changes or upgrades;
-- protecting from unexpected external fails.
-
-**Recommendation**
-
-Consider stabilizing the oracle interface and implementation to allow for an increase in developer speed, while retaining robust principles and execution
-
- 
-
----
-
-
 ### [Setting the backup oracle should impose the same restrictions everywhere](https://github.com/akiratechhq/review-volt-core-2022-09/issues/8)
-![Issue status: Open](https://img.shields.io/static/v1?label=Status&message=Open&color=5856D6&style=flat-square) ![Medium](https://img.shields.io/static/v1?label=Severity&message=Medium&color=FF9500&style=flat-square)
+![Issue status: Acknowledged](https://img.shields.io/static/v1?label=Status&message=Acknowledged&color=007AFF&style=flat-square) ![Medium](https://img.shields.io/static/v1?label=Severity&message=Medium&color=FF9500&style=flat-square)
 
 **Description**
 
@@ -324,7 +219,7 @@ Add a check to ensure that the backup oracle is different from the main oracle i
 
 
 ### [Setting the invert flag in `OracleRef` might have unexpected consequences](https://github.com/akiratechhq/review-volt-core-2022-09/issues/7)
-![Issue status: Open](https://img.shields.io/static/v1?label=Status&message=Open&color=5856D6&style=flat-square) ![Medium](https://img.shields.io/static/v1?label=Severity&message=Medium&color=FF9500&style=flat-square)
+![Issue status: Acknowledged](https://img.shields.io/static/v1?label=Status&message=Acknowledged&color=007AFF&style=flat-square) ![Medium](https://img.shields.io/static/v1?label=Severity&message=Medium&color=FF9500&style=flat-square)
 
 **Description**
 
@@ -490,7 +385,7 @@ Consider removing the logic related to updating `decimalsNormalizer` in the inte
 
 
 ### [Method `compoundInterest` can be gas optimized when emitting event](https://github.com/akiratechhq/review-volt-core-2022-09/issues/6)
-![Issue status: Open](https://img.shields.io/static/v1?label=Status&message=Open&color=5856D6&style=flat-square) ![Minor](https://img.shields.io/static/v1?label=Severity&message=Minor&color=FFCC00&style=flat-square)
+![Issue status: Acknowledged](https://img.shields.io/static/v1?label=Status&message=Acknowledged&color=007AFF&style=flat-square) ![Minor](https://img.shields.io/static/v1?label=Severity&message=Minor&color=FFCC00&style=flat-square)
 
 **Description**
 
@@ -534,7 +429,7 @@ Consider emitting the stack value `periodEndTime` instead using the storage slot
 
 
 ### [`_validPrice` can include floor and ceiling values when checking the validity](https://github.com/akiratechhq/review-volt-core-2022-09/issues/3)
-![Issue status: Open](https://img.shields.io/static/v1?label=Status&message=Open&color=5856D6&style=flat-square) ![Minor](https://img.shields.io/static/v1?label=Severity&message=Minor&color=FFCC00&style=flat-square)
+![Issue status: Acknowledged](https://img.shields.io/static/v1?label=Status&message=Acknowledged&color=007AFF&style=flat-square) ![Minor](https://img.shields.io/static/v1?label=Severity&message=Minor&color=FFCC00&style=flat-square)
 
 **Description**
 
@@ -629,7 +524,7 @@ Consider using the methods `greaterThanOrEqualTo` and `lessThanOrEqualTo` provid
 
 
 ### [Setting ceiling basis points does not need a non zero validation](https://github.com/akiratechhq/review-volt-core-2022-09/issues/2)
-![Issue status: Open](https://img.shields.io/static/v1?label=Status&message=Open&color=5856D6&style=flat-square) ![Minor](https://img.shields.io/static/v1?label=Severity&message=Minor&color=FFCC00&style=flat-square)
+![Issue status: Acknowledged](https://img.shields.io/static/v1?label=Status&message=Acknowledged&color=007AFF&style=flat-square) ![Minor](https://img.shields.io/static/v1?label=Severity&message=Minor&color=FFCC00&style=flat-square)
 
 **Description**
 
@@ -694,6 +589,111 @@ To increase readability and to help the developer reason about the code, the che
 
 Consider replacing the `require` with a comment that explains why the check is not necessary.
 
+
+---
+
+
+### [Oracle implementation can be made more robust](https://github.com/akiratechhq/review-volt-core-2022-09/issues/5)
+![Issue status: Acknowledged](https://img.shields.io/static/v1?label=Status&message=Acknowledged&color=007AFF&style=flat-square) ![Informational](https://img.shields.io/static/v1?label=Severity&message=Informational&color=34C759&style=flat-square)
+
+**Description**
+
+The current oracle implementation does not account for external systems failures. There is no immediate threat, but the oracle system must be a very robust and trusted component.
+
+Consider this approach for implementing an oracle system.
+
+We define a base class that handles passing the value obtained from an oracle implementation. This class implements a robust approach for getting the value, even if the implementation fails. 
+
+```solidity
+abstract contract OracleBase {
+    function value() external returns (uint256 value_, bool valid_) {
+        // Try to get the value
+        try this.obtainValue() returns (uint256 valueReturned, bool valid) {
+            // Prepare the value to be returned
+            value_ = valueReturned;
+            // Pass the valid bool
+            valid_ = valid;
+        } catch {
+            value_ = 0;
+            valid_ = false;
+        }
+
+        return (value_, valid_);
+    }
+
+    function obtainValue() external virtual returns (uint256 value, bool valid);
+}
+```
+
+The call to `obtainValue()` can fail because of external calls or improper developer implementation. Whatever the case, the base class can handle these fails and can do much more if multiple fails happen in a row, or provide a cached value, or notify a system that they're offline.
+
+Any oracle will use this base class and must implement `obtainValue` specific to the value they need to retrieve.
+
+```solidity
+
+contract OracleImplementation is OracleBase {
+    ExternalContract immutable public ec;
+
+    constructor(ExternalContract _ec) {
+        // Save the external provider's address
+        ec = _ec;
+    }
+
+    function obtainValue() override(OracleBase) external returns (uint256, bool) {
+        // Make sure this is not called externally by anyone else. 
+        require(msg.sender == address(this), "Oracle must call itself to get the value");
+
+        // Talk to `ExternalContract` and get the scale
+        uint256 scale = ec.getScale();
+
+        // Sometimes you need to do something with the value
+        scale = scale / 10;
+
+        // Validate the processed value
+        bool valid = scale <= 42;
+
+        // Return scale
+        return (scale, valid);
+    }
+}
+```
+
+In this case, `OracleImplementation` talks to an external system, and they don't need to account for any failures, unexpected upgrades or weird behavior.
+
+Its only purpose is to obtain the value, process it (if necessary), validate it and return the value if the validity.
+
+`OracleBase` should not care what the value represents, its purpose is to handle failures and pass on the values.
+
+`OracleImplementation` has to understand the value obtained and must know how to process and validate it.
+
+Finally, we tested this with an implementation that returns a value or sometimes fails to ensure our example implementation holds.
+
+```solidity
+contract ExternalContract {
+    function getScale() public view returns (uint256 scale_) {
+        // Simulate random reverts
+        if (block.number % 2 == 0) {
+            // fail
+            revert("Sometimes it fails");
+        } else {
+            // return a value, do not fail
+            return 12;
+        }
+    }
+}
+```
+
+Separating the concerns between `OracleBase` and `OracleImplementation` allows for:
+
+- adding new developers that do not have to understand the whole system in order to develop an oracle;
+- protecting from unexpected external changes or upgrades;
+- protecting from unexpected external fails.
+
+**Recommendation**
+
+Consider stabilizing the oracle interface and implementation to allow for an increase in developer speed, while retaining robust principles and execution
+
+ 
 
 ---
 
