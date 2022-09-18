@@ -33,8 +33,8 @@
     - [x] [Pub] getCurrentOraclePrice
        - [x] Check this math
     - [ ] [Ext] compoundInterest #
-       - [ ] Can cache value of `getCurrentOraclePrice()` to save gas; useful when emitting the event.
-       - [ ] Can use value of `periodEndTime` instead of `periodStartTime` to save gas; useful when emitting the event.
+       - [x] Can cache value of `getCurrentOraclePrice()` to save gas; useful when emitting the event.
+       - [x] Can use value of `periodEndTime` instead of `periodStartTime` to save gas; useful when emitting the event.
 
     - [x] Why is timeframe 30.42 days? Can this be exploited?
           365 / 12 = 30.42
@@ -89,7 +89,7 @@
     - [x] [Int] _addWhitelistAddress #
     - [x] [Int] _removeWhitelistAddress #
 
-   - [ ] PausableLib is a bit awkward. Why not use an interface?
+   - [x] PausableLib is a bit awkward. Why not use an interface?
 
  +  PCVGuardAdmin (IPCVGuardAdmin, CoreRef)
     - [x] [Pub] <Constructor> #
@@ -114,41 +114,41 @@
     - [x] [Pub] vcon
     - [x] [Pub] voltBalance
     - [x] [Pub] vconBalance
-    - [ ] [Int] _burnVoltHeld #
-      - [ ] Not used. Remove?
-    - [ ] [Int] _mintVolt #
-      - [ ] Not used. Remove?
+    - [x] [Int] _burnVoltHeld #
+      - [x] Not used. Remove?
+    - [x] [Int] _mintVolt #
+      - [x] Not used. Remove?
     - [x] [Int] _setContractAdminRole #
 
-    - [ ] `hasAnyOf{number}Roles` could be replaced with an array of roles.
+    - [x] `hasAnyOf{number}Roles` could be replaced with an array of roles.
 
  +  OracleRef (IOracleRef, CoreRef)
-    - [ ] [Pub] <Constructor> #
+    - [x] [Pub] <Constructor> #
        - modifiers: CoreRef
     - [x] [Ext] setOracle #
        - modifiers: onlyGovernor
     - [x] [Ext] setDoInvert #
        - modifiers: onlyGovernor
-       - [ ] Add comment saying that decimals normalizer is updated.
+       - [x] Add comment saying that decimals normalizer is updated.
     - [x] [Ext] setDecimalsNormalizer #
        - modifiers: onlyGovernor
     - [x] [Ext] setBackupOracle #
        - modifiers: onlyGovernorOrAdmin
-       - [ ] Should check `_oracle != _backupOracle`.
+       - [x] Should check `_oracle != _backupOracle`.
     - [x] [Pub] invert
     - [x] [Pub] updateOracle #
-    - [ ] [Pub] readOracle
-      - [ ] Consider `try/catch` in `readOracle`.
+    - [x] [Pub] readOracle
+      - [x] Consider `try/catch` in `readOracle`.
       - [x] Will lose precision on scaling down.
     - [x] [Int] _setOracle #
     - [x] [Int] _setBackupOracle #
     - [ ] [Int] _setDoInvert #
-       - [ ] Confuses me since seems to work in tandem with `decimalsNormalizer`
+       - [x] Confuses me since seems to work in tandem with `decimalsNormalizer`
     - [x] [Int] _setDecimalsNormalizer #
     - [x] [Int] _setDecimalsNormalizerFromToken #
-       - [ ] Not used. Remove?
+       - [x] Not used. Remove?
 
-    - [ ] Discuss invert, backup oracle.
+    - [x] Discuss invert, backup oracle.
     
 
  +  ERC20CompoundPCVDeposit (CompoundPCVDepositBase)
@@ -199,13 +199,7 @@
     - [x] [Int] _checkSkimCondition
       - [x] Is `.balance()` always in sync with `.balanceOf()`?
 
-
-
- ($) = payable function
- # = non-constant function
-  
-
-
+- [ ] Update `Whitepaper` document with https://github.com/volt-protocol/whitepaper/blob/mgov/README.md
 
  ($) = payable function
  # = non-constant function

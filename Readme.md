@@ -49,6 +49,9 @@
  - [Scope](#scope)
  - [Issues](#issues)
      - [Oracle implementation can be made more robust](#oracle-implementation-can-be-made-more-robust)
+     - [Setting the backup oracle should impose the same restrictions everywhere](#setting-the-backup-oracle-should-impose-the-same-restrictions-everywhere)
+     - [Setting the invert flag in OracleRef might have unexpected consequences](#setting-the-invert-flag-in-oracleref-might-have-unexpected-consequences)
+     - [Method compoundInterest can be gas optimized when emitting event](#method-compoundinterest-can-be-gas-optimized-when-emitting-event)
      - [_validPrice can include floor and ceiling values when checking the validity](#_validprice-can-include-floor-and-ceiling-values-when-checking-the-validity)
      - [Setting ceiling basis points does not need a non zero validation](#setting-ceiling-basis-points-does-not-need-a-non-zero-validation)
  - [Artifacts](#artifacts)
@@ -62,7 +65,7 @@
 - **Client** Volt Protocol
 - **Date** September 2022
 - **Lead reviewer** Daniel Luca ([@cleanunicorn](https://twitter.com/cleanunicorn))
-- **Reviewers** Daniel Luca ([@cleanunicorn](https://twitter.com/cleanunicorn)), Andrei Simion ([@andreiashu](https://twitter.com/andreiashu))
+- **Reviewers** Daniel Luca ([@cleanunicorn](https://twitter.com/cleanunicorn))
 - **Repository**: [Volt Protocol Core](https://github.com/volt-protocol/volt-protocol-core.git)
 - **Commit hash** `86868c6f77fca67ed6586674437cc9bfc85c1963`
 - **Final commit hash** `1a1ce42f5131059084b8def03a75c334762fad98`
@@ -75,8 +78,8 @@
 | SEVERITY       |    OPEN    |    CLOSED    |
 |----------------|:----------:|:------------:|
 |  Informational  |  0  |  1  |
-|  Minor  |  2  |  0  |
-|  Medium  |  0  |  0  |
+|  Minor  |  3  |  0  |
+|  Medium  |  2  |  0  |
 |  Major  |  0  |  0  |
 
 ## Executive summary
@@ -119,7 +122,7 @@ We focused on manually reviewing the codebase, searching for security issues suc
 
 Documents:
 
-- [Market Governance Whitepaper](https://docs.google.com/document/d/1eSlmC_010gedoYoxN702lDU_2Y6atMfuOnvXxsITcOs/edit)
+- [Market Governance Whitepaper](https://github.com/volt-protocol/whitepaper/blob/mgov/README.md)
 - [Market Governance Alpha](https://docs.google.com/document/d/1wmK0esBaIxHx_iDXXHWjMo7RaELo3RVBjImhMdefyJg/edit)
 
 
@@ -228,6 +231,304 @@ Separating the concerns between `OracleBase` and `OracleImplementation` allows f
 Consider stabilizing the oracle interface and implementation to allow for an increase in developer speed, while retaining robust principles and execution
 
  
+
+---
+
+
+### [Setting the backup oracle should impose the same restrictions everywhere](https://github.com/akiratechhq/review-volt-core-2022-09/issues/8)
+![Issue status: Open](https://img.shields.io/static/v1?label=Status&message=Open&color=5856D6&style=flat-square) ![Medium](https://img.shields.io/static/v1?label=Severity&message=Medium&color=FF9500&style=flat-square)
+
+**Description**
+
+The `OracleRef` contract is deployed with a few arguments:
+
+
+[code/contracts/refs/OracleRef.sol#L27-L39](https://github.com/akiratechhq/review-volt-core-2022-09/blob/e37f6c87bc8f25ff472803f3ee3f526249d2a0e0/code/contracts/refs/OracleRef.sol#L27-L39)
+```solidity
+    /// @notice OracleRef constructor
+    /// @param _core Fei Core to reference
+    /// @param _oracle oracle to reference
+    /// @param _backupOracle backup oracle to reference
+    /// @param _decimalsNormalizer number of decimals to normalize the oracle feed if necessary
+    /// @param _doInvert invert the oracle price if this flag is on
+    constructor(
+        address _core,
+        address _oracle,
+        address _backupOracle,
+        int256 _decimalsNormalizer,
+        bool _doInvert
+    ) CoreRef(_core) {
+```
+
+Before setting the backup oracle, its value is checked to be different from `address(0)` and different from `_oracle`:
+
+
+[code/contracts/refs/OracleRef.sol#L41-L43](https://github.com/akiratechhq/review-volt-core-2022-09/blob/e37f6c87bc8f25ff472803f3ee3f526249d2a0e0/code/contracts/refs/OracleRef.sol#L41-L43)
+```solidity
+        if (_backupOracle != address(0) && _backupOracle != _oracle) {
+            _setBackupOracle(_backupOracle);
+        }
+```
+
+However, when calling the external method `setBackupOracle` the same checks are not applied:
+
+
+[code/contracts/refs/OracleRef.sol#L70-L78](https://github.com/akiratechhq/review-volt-core-2022-09/blob/e37f6c87bc8f25ff472803f3ee3f526249d2a0e0/code/contracts/refs/OracleRef.sol#L70-L78)
+```solidity
+    /// @notice sets the referenced backup oracle
+    /// @param newBackupOracle the new backup oracle to reference
+    function setBackupOracle(address newBackupOracle)
+        external
+        override
+        onlyGovernorOrAdmin
+    {
+        _setBackupOracle(newBackupOracle);
+    }
+```
+
+
+[code/contracts/refs/OracleRef.sol#L133-L138](https://github.com/akiratechhq/review-volt-core-2022-09/blob/e37f6c87bc8f25ff472803f3ee3f526249d2a0e0/code/contracts/refs/OracleRef.sol#L133-L138)
+```solidity
+    // Supports zero address if no backup
+    function _setBackupOracle(address newBackupOracle) internal {
+        address oldBackupOracle = address(backupOracle);
+        backupOracle = IOracle(newBackupOracle);
+        emit BackupOracleUpdate(oldBackupOracle, newBackupOracle);
+    }
+```
+
+We can see the comment saying that the address zero can be set if we want to disable the oracle:
+
+
+[code/contracts/refs/OracleRef.sol#L133](https://github.com/akiratechhq/review-volt-core-2022-09/blob/e37f6c87bc8f25ff472803f3ee3f526249d2a0e0/code/contracts/refs/OracleRef.sol#L133)
+```solidity
+    // Supports zero address if no backup
+```
+
+Which disables the backup oracle in `readOracle`:
+
+
+[code/contracts/refs/OracleRef.sol#L103](https://github.com/akiratechhq/review-volt-core-2022-09/blob/e37f6c87bc8f25ff472803f3ee3f526249d2a0e0/code/contracts/refs/OracleRef.sol#L103)
+```solidity
+        if (!valid && address(backupOracle) != address(0)) {
+```
+
+The second check is not enforced, thus the backup oracle could be equal to the main oracle. 
+
+**Recommendation**
+
+Add a check to ensure that the backup oracle is different from the main oracle in the internal method `_setBackupOracle` and remove the same check in `constructor`.
+
+
+---
+
+
+### [Setting the invert flag in `OracleRef` might have unexpected consequences](https://github.com/akiratechhq/review-volt-core-2022-09/issues/7)
+![Issue status: Open](https://img.shields.io/static/v1?label=Status&message=Open&color=5856D6&style=flat-square) ![Medium](https://img.shields.io/static/v1?label=Severity&message=Medium&color=FF9500&style=flat-square)
+
+**Description**
+
+The method `setDoInvert` sets a storage flag that affects the value read from the oracle.
+
+The value determines if it is inverted according to `doInvert`
+
+$$
+f(x) = 
+\begin{cases}
+1/x & \quad \text{when doInvert is }true\\
+x & \quad \text{otherwise}
+\end{cases}
+$$ 
+
+
+[code/contracts/refs/OracleRef.sol#L108-L111](https://github.com/akiratechhq/review-volt-core-2022-09/blob/e37f6c87bc8f25ff472803f3ee3f526249d2a0e0/code/contracts/refs/OracleRef.sol#L108-L111)
+```solidity
+        // Invert the oracle price if necessary
+        if (doInvert) {
+            _peg = invert(_peg);
+        }
+```
+
+The value then proceeds to be scaled before being returned:
+
+
+[code/contracts/refs/OracleRef.sol#L113-L123](https://github.com/akiratechhq/review-volt-core-2022-09/blob/e37f6c87bc8f25ff472803f3ee3f526249d2a0e0/code/contracts/refs/OracleRef.sol#L113-L123)
+```solidity
+        // Scale the oracle price by token decimals delta if necessary
+        uint256 scalingFactor;
+        if (decimalsNormalizer < 0) {
+            scalingFactor = 10**(-1 * decimalsNormalizer).toUint256();
+            _peg = _peg.div(scalingFactor);
+        } else {
+            scalingFactor = 10**decimalsNormalizer.toUint256();
+            _peg = _peg.mul(scalingFactor);
+        }
+
+        return _peg;
+```
+
+The storage slot `doInvert` is updated by calling the `external` method:
+
+
+[code/contracts/refs/OracleRef.sol#L54-L58](https://github.com/akiratechhq/review-volt-core-2022-09/blob/e37f6c87bc8f25ff472803f3ee3f526249d2a0e0/code/contracts/refs/OracleRef.sol#L54-L58)
+```solidity
+    /// @notice sets the flag for whether to invert or not
+    /// @param newDoInvert the new flag for whether to invert
+    function setDoInvert(bool newDoInvert) external override onlyGovernor {
+        _setDoInvert(newDoInvert);
+    }
+```
+
+This proceeds to call internally `_setDoInvert`:
+
+
+[code/contracts/refs/OracleRef.sol#L140-L149](https://github.com/akiratechhq/review-volt-core-2022-09/blob/e37f6c87bc8f25ff472803f3ee3f526249d2a0e0/code/contracts/refs/OracleRef.sol#L140-L149)
+```solidity
+    function _setDoInvert(bool newDoInvert) internal {
+        bool oldDoInvert = doInvert;
+        doInvert = newDoInvert;
+
+        if (oldDoInvert != newDoInvert) {
+            _setDecimalsNormalizer(-1 * decimalsNormalizer);
+        }
+
+        emit InvertUpdate(oldDoInvert, newDoInvert);
+    }
+```
+
+It is not obvious nor documented that changing the invert value will also update the decimals normalizer.
+
+Consider the example where the governance wants to update the oracle's invert and decimal scaling. To do that the following methods need to be executed:
+
+- `OracleRef.setDoInvert(bool)`
+- `OracleRef.setDecimalsNormalizer(int256)`
+
+Depending on the order of the called methods you will have different final values for the decimals normalizer.
+
+1. Updating `doInvert` first and `decimalsNormalizer` second
+
+##### Initial values
+```solidity
+doInvert = false;
+decimalsNormalizer = 18;
+```
+
+##### Update values
+```solidity
+doInvert(true);
+setDecimalsNormalizer(-12);
+```
+
+##### Final values
+```solidity
+doInvert = true;
+decimalsNormalizer = -12;
+```
+
+2. Updating `decimalsNormalizer` first and `doInvert` second
+
+##### We start from the same initial values
+```solidity
+doInvert = false;
+decimalsNormalizer = 18;
+```
+
+##### We update the values, but in a different order
+```solidity
+setDecimalsNormalizer(-12);
+doInvert(true);
+```
+
+##### The final values can be unexpected for the governance
+```solidity
+doInvert = true;
+decimalsNormalizer = 12;
+```
+
+Even though we set the decimals to be `-12`, because we also updated the invert flag, we obtained a different value for our decimals scaling. The order of operations determines our final value for the decimals scaling. 
+
+This time the `decimalsNormalizer` is updated first. Thus, we have `decimalsNormalizer = -12`.
+
+When the method `doInvert(true)` is executed, the old value is first saved, and the flag `doInvert` is set to `true`:
+
+
+[code/contracts/refs/OracleRef.sol#L140-L142](https://github.com/akiratechhq/review-volt-core-2022-09/blob/e37f6c87bc8f25ff472803f3ee3f526249d2a0e0/code/contracts/refs/OracleRef.sol#L140-L142)
+```solidity
+    function _setDoInvert(bool newDoInvert) internal {
+        bool oldDoInvert = doInvert;
+        doInvert = newDoInvert;
+```
+
+After this, because the old value is different from the current value, the decimals normalizer is also inverted:
+
+
+[code/contracts/refs/OracleRef.sol#L144-L146](https://github.com/akiratechhq/review-volt-core-2022-09/blob/e37f6c87bc8f25ff472803f3ee3f526249d2a0e0/code/contracts/refs/OracleRef.sol#L144-L146)
+```solidity
+        if (oldDoInvert != newDoInvert) {
+            _setDecimalsNormalizer(-1 * decimalsNormalizer);
+        }
+```
+
+This might be unexpected because it's not obvious, it's "hidden" in the internal method and an event is not emitted.
+
+We can clearly see how changing the order of the operations can unexpectedly update `decimalsNormalizer`.
+
+**Recommendation**
+
+Consider removing the logic related to updating `decimalsNormalizer` in the internal method `_setDoInvert `:
+
+
+[code/contracts/refs/OracleRef.sol#L144-L146](https://github.com/akiratechhq/review-volt-core-2022-09/blob/e37f6c87bc8f25ff472803f3ee3f526249d2a0e0/code/contracts/refs/OracleRef.sol#L144-L146)
+```solidity
+        if (oldDoInvert != newDoInvert) {
+            _setDecimalsNormalizer(-1 * decimalsNormalizer);
+        }
+```
+
+
+---
+
+
+### [Method `compoundInterest` can be gas optimized when emitting event](https://github.com/akiratechhq/review-volt-core-2022-09/issues/6)
+![Issue status: Open](https://img.shields.io/static/v1?label=Status&message=Open&color=5856D6&style=flat-square) ![Minor](https://img.shields.io/static/v1?label=Severity&message=Minor&color=FFCC00&style=flat-square)
+
+**Description**
+
+The method `compountInterest` calculates the compounded interest if enough time has passed.
+
+If the conditions are met, a new oracle price is saved and an event is emitted.
+
+
+[code/contracts/oracle/VoltSystemOracle.sol#L80-L88](https://github.com/akiratechhq/review-volt-core-2022-09/blob/e37f6c87bc8f25ff472803f3ee3f526249d2a0e0/code/contracts/oracle/VoltSystemOracle.sol#L80-L88)
+```solidity
+        /// first set Oracle Price to interpolated value
+        oraclePrice = getCurrentOraclePrice();
+
+        /// set periodStartTime to periodStartTime + timeframe,
+        /// this is equivalent to init timed, which wipes out all unaccumulated compounded interest
+        /// and cleanly sets the start time.
+        periodStartTime = periodEndTime;
+
+        emit InterestCompounded(periodStartTime, oraclePrice);
+```
+
+The emission of the event can be gas optimized a bit, by using the stack value instead of the storage slot since they represent the same value.
+
+
+[code/contracts/oracle/VoltSystemOracle.sol#L83-L88](https://github.com/akiratechhq/review-volt-core-2022-09/blob/e37f6c87bc8f25ff472803f3ee3f526249d2a0e0/code/contracts/oracle/VoltSystemOracle.sol#L83-L88)
+```solidity
+        /// set periodStartTime to periodStartTime + timeframe,
+        /// this is equivalent to init timed, which wipes out all unaccumulated compounded interest
+        /// and cleanly sets the start time.
+        periodStartTime = periodEndTime;
+
+        emit InterestCompounded(periodStartTime, oraclePrice);
+```
+
+**Recommendation**
+
+Consider emitting the stack value `periodEndTime` instead using the storage slot `periodStartTime` since they have the same value and will use less gas.
+
 
 ---
 
